@@ -175,9 +175,10 @@
     <div class="controls">
         <select id="missionSelector"></select>
         <div id="aircraftFilter"></div>
+        <input type="text" id="statsSearchInput" placeholder="Search pilots...">
     </div>
     <div class="table-container">
-            <table id="pilotStatsTable" class="display">
+        <table id="pilotStatsTable" class="display">
             <thead>
                 <tr>
                     <th>Pilot Name</th>
@@ -319,8 +320,11 @@
                 ]
             });
 
-            $('#statsSearchInput').on('keyup', handleSearchInput);
+            $('#statsSearchInput').on('keyup', filterStats);
         });
+
+        // Initial filter application
+        filterStats();
     </script>
 </body>
 </html>
