@@ -283,6 +283,11 @@
             table.draw();
         }
 
+        function handleSearchInput() {
+            const searchText = $('#statsSearchInput').val().toLowerCase();
+            filterStats();
+        }
+
         $(document).ready(function() {
             const table = $('#pilotStatsTable').DataTable({
                 paging: false,
@@ -314,7 +319,7 @@
                 ]
             });
 
-            $('#statsSearchInput').on('keyup', filterStats);
+            $('#statsSearchInput').on('keyup', handleSearchInput);
         });
     </script>
 </body>
