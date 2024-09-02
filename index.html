@@ -131,6 +131,15 @@
         #pilotStatsTable {
             width: 100% !important;
         }
+        #pilotStatsTable th:nth-child(1),
+        #pilotStatsTable td:nth-child(1),
+        #pilotStatsTable th:nth-child(2),
+        #pilotStatsTable td:nth-child(2) {
+            max-width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
         .dataTables_wrapper .dataTables_filter input {
             background-color: #333;
             color: #e0e0e0;
