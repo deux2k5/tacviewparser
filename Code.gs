@@ -11,7 +11,7 @@ function getMissionData(missionNumber) {
   var sheet;
   
   if (missionNumber === 'Overall') {
-    sheet = spreadsheet.getSheetByName('OGA_Kill_Tracker_Overall');
+    sheet = spreadsheet.getSheetByName('Overall');
   } else {
     sheet = spreadsheet.getSheetByName('Mission ' + missionNumber);
   }
