@@ -95,7 +95,7 @@ class TacviewApp(QMainWindow):
                 'Fired': 0,
                 'Hit': 0,
                 'Destroyed': 0,
-                'Killed': {'Aircraft': 0, 'Helicopter': 0, 'Ship': 0, 'SAM/AAA': 0, 'Tank': 0, 'Car': 0},
+                'Killed': {'Aircraft': 0, 'Helicopter': 0, 'Ship': 0, 'SAM/AAA': 0, 'Tank': 0, 'Car': 0, 'Infantry': 0},
                 'FriendlyFire': 0
             }
 
@@ -112,7 +112,10 @@ class TacviewApp(QMainWindow):
             if event['SecondaryObject'] and 'Pilot' in event['SecondaryObject']:
                 killer = event['SecondaryObject']['Pilot']
                 if killer in self.stats:
-                    self.stats[killer]['Killed'][event['PrimaryObject']['Type']] += 1
+                    object_type = event['PrimaryObject']['Type']
+                    if object_type not in self.stats[killer]['Killed']:
+                        self.stats[killer]['Killed'][object_type] = 0
+                    self.stats[killer]['Killed'][object_type] += 1
                     if event['PrimaryObject'].get('Coalition') == event['SecondaryObject'].get('Coalition'):
                         self.stats[killer]['FriendlyFire'] += 1
 
@@ -123,10 +126,10 @@ class TacviewApp(QMainWindow):
         self.infoTextEdit.setText(info)
 
     def displayStats(self):
-        self.statsTable.setColumnCount(16)
+        self.statsTable.setColumnCount(17)
         self.statsTable.setHorizontalHeaderLabels([
             "Pilot", "Aircraft", "Group", "Take-offs", "Landings", "Fired", "Aircraft Kills",
-            "Helo Kills", "Ship Kills", "SAM Kills", "Tank Kills", "Car Kills", "Team Kills", "Hit", "Destroyed"
+            "Helo Kills", "Ship Kills", "SAM Kills", "Tank Kills", "Car Kills", "Infantry Kills", "Team Kills", "Hit", "Destroyed"
         ])
         self.statsTable.setRowCount(len(self.stats))
 
@@ -137,15 +140,16 @@ class TacviewApp(QMainWindow):
             self.statsTable.setItem(row, 3, QTableWidgetItem(str(data['TakeOffs'])))
             self.statsTable.setItem(row, 4, QTableWidgetItem(str(data['Lands'])))
             self.statsTable.setItem(row, 5, QTableWidgetItem(str(data['Fired'])))
-            self.statsTable.setItem(row, 6, QTableWidgetItem(str(data['Killed']['Aircraft'])))
-            self.statsTable.setItem(row, 7, QTableWidgetItem(str(data['Killed']['Helicopter'])))
-            self.statsTable.setItem(row, 8, QTableWidgetItem(str(data['Killed']['Ship'])))
-            self.statsTable.setItem(row, 9, QTableWidgetItem(str(data['Killed']['SAM/AAA'])))
-            self.statsTable.setItem(row, 10, QTableWidgetItem(str(data['Killed']['Tank'])))
-            self.statsTable.setItem(row, 11, QTableWidgetItem(str(data['Killed']['Car'])))
-            self.statsTable.setItem(row, 12, QTableWidgetItem(str(data['FriendlyFire'])))
-            self.statsTable.setItem(row, 13, QTableWidgetItem(str(data['Hit'])))
-            self.statsTable.setItem(row, 14, QTableWidgetItem(str(data['Destroyed'])))
+            self.statsTable.setItem(row, 6, QTableWidgetItem(str(data['Killed'].get('Aircraft', 0))))
+            self.statsTable.setItem(row, 7, QTableWidgetItem(str(data['Killed'].get('Helicopter', 0))))
+            self.statsTable.setItem(row, 8, QTableWidgetItem(str(data['Killed'].get('Ship', 0))))
+            self.statsTable.setItem(row, 9, QTableWidgetItem(str(data['Killed'].get('SAM/AAA', 0))))
+            self.statsTable.setItem(row, 10, QTableWidgetItem(str(data['Killed'].get('Tank', 0))))
+            self.statsTable.setItem(row, 11, QTableWidgetItem(str(data['Killed'].get('Car', 0))))
+            self.statsTable.setItem(row, 12, QTableWidgetItem(str(data['Killed'].get('Infantry', 0))))
+            self.statsTable.setItem(row, 13, QTableWidgetItem(str(data['FriendlyFire'])))
+            self.statsTable.setItem(row, 14, QTableWidgetItem(str(data['Hit'])))
+            self.statsTable.setItem(row, 15, QTableWidgetItem(str(data['Destroyed'])))
 
         self.statsTable.resizeColumnsToContents()
 
