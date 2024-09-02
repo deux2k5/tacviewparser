@@ -24,17 +24,12 @@
                     <canvas id="pilotStatsChart"></canvas>
                 </div>
             </div>
-            
-            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-                <h2 class="text-2xl font-semibold mb-4">Events Timeline</h2>
-                <div id="eventsTimeline" class="overflow-x-auto"></div>
-            </div>
         </div>
     </div>
 
     <script>
         let missions = {};
-        let currentMission = 1;
+        let currentMission = null;
 
         google.script.run.withSuccessHandler(initializeMissions).getAvailableMissions();
 
@@ -48,26 +43,23 @@
                 tabsContainer.appendChild(tab);
             });
 
-            google.script.run.withSuccessHandler(function(data) {
-                missions = data;
-                loadMission(currentMission);
-            }).getMissionData();
+            if (availableMissions.length > 0) {
+                loadMission(availableMissions[0]);
+            }
         }
 
         function loadMission(missionNumber) {
             currentMission = missionNumber;
-            const data = missions[missionNumber];
-            if (data) {
-                displayData(data);
-            } else {
-                alert('Mission data not found');
-            }
+            google.script.run.withSuccessHandler(displayData).getMissionData(missionNumber);
         }
 
         function displayData(data) {
-            displayMissionInfo(data.missionInfo);
-            displayPilotStats(data.pilotStats);
-            displayEventsTimeline(data.events);
+            if (data) {
+                displayMissionInfo(data.missionInfo);
+                displayPilotStats(data.pilotStats);
+            } else {
+                alert('Mission data not found');
+            }
         }
 
         function displayMissionInfo(info) {
@@ -87,7 +79,7 @@
                     labels: stats.map(s => s.pilotName),
                     datasets: [{
                         label: 'Kills',
-                        data: stats.map(s => s.killedAircraft + s.killedHelicopter + s.killedShip + s.killedSAM + s.killedTank + s.killedCar + s.killedInfantry),
+                        data: stats.map(s => s.killedAircraft + s.killedHelicopter + s.killedShip + s.killedSAM + s.killedTank + s.killedCar),
                         backgroundColor: 'rgba(54, 162, 235, 0.5)',
                         borderColor: 'rgb(54, 162, 235)',
                         borderWidth: 1
@@ -108,21 +100,6 @@
                     }
                 }
             });
-        }
-
-        function displayEventsTimeline(events) {
-            const timelineDiv = document.getElementById('eventsTimeline');
-            const timelineHTML = events.map(event => `
-                <div class="flex items-center mb-4">
-                    <div class="w-24 text-sm text-gray-600">${event.time}</div>
-                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">${event.type.charAt(0)}</div>
-                    <div class="ml-4 flex-grow">
-                        <p class="text-sm font-semibold">${event.type}</p>
-                        <p class="text-sm text-gray-600">${event.action}</p>
-                    </div>
-                </div>
-            `).join('');
-            timelineDiv.innerHTML = timelineHTML;
         }
     </script>
 </body>
