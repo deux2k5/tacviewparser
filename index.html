@@ -253,7 +253,7 @@
             $.fn.dataTable.ext.search.push(
                 function(settings, data, dataIndex) {
                     const aircraft = data[1]; // Assuming aircraft is in the second column
-                    return allowedAircraft.includes(aircraft);
+                    return allowedAircraft.includes(aircraft) && selectedAircraft.includes(aircraft);
                 }
             );
             
