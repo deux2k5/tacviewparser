@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tacview Mission Data</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold mb-8 text-center text-blue-600">Tacview Mission Data</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-semibold mb-4">Mission Information</h2>
+                <div id="missionInfo"></div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-semibold mb-4">Pilot Statistics</h2>
+                <canvas id="pilotStatsChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Events Timeline</h2>
+            <div id="eventsTimeline" class="overflow-x-auto"></div>
+        </div>
+    </div>
+
+    <script>
+        google.script.run.withSuccessHandler(displayData).getData();
+
+        function displayData(data) {
+            displayMissionInfo(data.missionInfo);
+            displayPilotStats(data.pilotStats);
+            displayEventsTimeline(data.events);
+        }
+
+        function displayMissionInfo(info) {
+            const missionInfoDiv = document.getElementById('missionInfo');
+            missionInfoDiv.innerHTML = `
+                <p><strong>Mission Name:</strong> ${info.missionName}</p>
+                <p><strong>Mission Time:</strong> ${info.missionTime}</p>
+                <p><strong>Mission Duration:</strong> ${info.missionDuration}</p>
+            `;
+        }
+
+        function displayPilotStats(stats) {
+            const ctx = document.getElementById('pilotStatsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: stats.map(s => s.pilotName),
+                    datasets: [{
+                        label: 'Kills',
+                        data: stats.map(s => s.kills),
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgb(54, 162, 235)',
+                        borderWidth: 1
+                    }, {
+                        label: 'Deaths',
+                        data: stats.map(s => s.deaths),
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function displayEventsTimeline(events) {
+            const timelineDiv = document.getElementById('eventsTimeline');
+            const timelineHTML = events.map(event => `
+                <div class="flex items-center mb-4">
+                    <div class="w-24 text-sm text-gray-600">${event.time}</div>
+                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">${event.type.charAt(0)}</div>
+                    <div class="ml-4 flex-grow">
+                        <p class="text-sm font-semibold">${event.type}</p>
+                        <p class="text-sm text-gray-600">${event.action}</p>
+                    </div>
+                </div>
+            `).join('');
+            timelineDiv.innerHTML = timelineHTML;
+        }
+    </script>
+</body>
+</html>
