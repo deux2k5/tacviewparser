@@ -408,6 +408,11 @@
                 dtElements.forEach(el => el.style.color = '#e0e0e0');
             }
         }
+
+        function backToMainPage() {
+            location.reload();
+            google.script.run.withSuccessHandler(initializeMissions).getAvailableMissions();
+        }
     </script>
 </body>
 </html>
