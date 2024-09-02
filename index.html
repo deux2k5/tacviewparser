@@ -11,27 +11,55 @@
     <div class="container mx-auto px-4 py-8">
         <h1 class="text-4xl font-bold mb-8 text-center text-blue-600">Tacview Mission Data</h1>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-2xl font-semibold mb-4">Mission Information</h2>
-                <div id="missionInfo"></div>
-            </div>
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-2xl font-semibold mb-4">Pilot Statistics</h2>
-                <canvas id="pilotStatsChart"></canvas>
-            </div>
-        </div>
+        <div id="missionTabs" class="mb-8"></div>
         
-        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 class="text-2xl font-semibold mb-4">Events Timeline</h2>
-            <div id="eventsTimeline" class="overflow-x-auto"></div>
+        <div id="missionContent">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-2xl font-semibold mb-4">Mission Information</h2>
+                    <div id="missionInfo"></div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-2xl font-semibold mb-4">Pilot Statistics</h2>
+                    <canvas id="pilotStatsChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 class="text-2xl font-semibold mb-4">Events Timeline</h2>
+                <div id="eventsTimeline" class="overflow-x-auto"></div>
+            </div>
         </div>
     </div>
 
     <script>
-        google.script.run.withSuccessHandler(displayData).getData();
+        let currentMission = 1;
+
+        google.script.run.withSuccessHandler(initializeMissions).getAvailableMissions();
+
+        function initializeMissions(missions) {
+            const tabsContainer = document.getElementById('missionTabs');
+            missions.forEach(missionNumber => {
+                const tab = document.createElement('button');
+                tab.textContent = `Mission ${missionNumber}`;
+                tab.className = 'px-4 py-2 mr-2 mb-2 bg-blue-500 text-white rounded hover:bg-blue-600';
+                tab.onclick = () => loadMission(missionNumber);
+                tabsContainer.appendChild(tab);
+            });
+
+            loadMission(currentMission);
+        }
+
+        function loadMission(missionNumber) {
+            currentMission = missionNumber;
+            google.script.run.withSuccessHandler(displayData).getMissionData(missionNumber);
+        }
 
         function displayData(data) {
+            if (data === null) {
+                alert('Mission data not found');
+                return;
+            }
             displayMissionInfo(data.missionInfo);
             displayPilotStats(data.pilotStats);
             displayEventsTimeline(data.events);
@@ -54,13 +82,13 @@
                     labels: stats.map(s => s.pilotName),
                     datasets: [{
                         label: 'Kills',
-                        data: stats.map(s => s.kills),
+                        data: stats.map(s => s.killedAircraft + s.killedHelicopter + s.killedShip + s.killedSAM + s.killedTank + s.killedCar + s.killedInfantry),
                         backgroundColor: 'rgba(54, 162, 235, 0.5)',
                         borderColor: 'rgb(54, 162, 235)',
                         borderWidth: 1
                     }, {
                         label: 'Deaths',
-                        data: stats.map(s => s.deaths),
+                        data: stats.map(s => s.destroyed),
                         backgroundColor: 'rgba(255, 99, 132, 0.5)',
                         borderColor: 'rgb(255, 99, 132)',
                         borderWidth: 1
