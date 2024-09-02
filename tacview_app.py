@@ -281,10 +281,9 @@ class TacviewApp(QMainWindow):
 
     def displayStats(self):
         self.statsTable.clear()
-        self.statsTable.setColumnCount(16)
+        self.statsTable.setColumnCount(11)
         self.statsTable.setHorizontalHeaderLabels([
-            self.language.L("pilotName"), self.language.L("aircraft"), self.language.L("group"),
-            self.language.L("takeoff"), self.language.L("landing"), self.language.L("firedArmement"),
+            self.language.L("pilotName"), self.language.L("firedArmement"),
             self.language.L("killedAircraft"), self.language.L("killedHelo"), self.language.L("killedShip"),
             self.language.L("killedSAM"), self.language.L("killedTank"), self.language.L("killedCar"),
             self.language.L("killedInfantry"), self.language.L("teamKill"), self.language.L("hit"),
@@ -292,36 +291,23 @@ class TacviewApp(QMainWindow):
         ])
         self.statsTable.setRowCount(len(self.stats))
 
-        # Update aircraft filter
-        for aircraft in set(data['Aircraft'] for data in self.stats.values()):
-            if aircraft not in self.aircraftCheckboxes:
-                checkbox = QCheckBox(aircraft)
-                checkbox.setChecked(True)
-                checkbox.stateChanged.connect(self.filterStats)
-                self.aircraftCheckboxes[aircraft] = checkbox
-                self.aircraftFilter.widget().layout().addWidget(checkbox)
-
         for row, (pilot, data) in enumerate(self.stats.items()):
             self.statsTable.setItem(row, 0, QTableWidgetItem(pilot))
-            self.statsTable.setItem(row, 1, QTableWidgetItem(data['Aircraft']))
-            self.statsTable.setItem(row, 2, QTableWidgetItem(data['Group']))
-            self.statsTable.setItem(row, 3, QTableWidgetItem(str(data['TakeOffs']['Count'])))
-            self.statsTable.setItem(row, 4, QTableWidgetItem(str(data['Lands']['Count'])))
-            self.statsTable.setItem(row, 5, QTableWidgetItem(str(data['Fired']['Count'])))
-            self.statsTable.setItem(row, 6, QTableWidgetItem(str(data['Killed']['Aircraft']['Count'])))
-            self.statsTable.setItem(row, 7, QTableWidgetItem(str(data['Killed']['Helicopter']['Count'])))
-            self.statsTable.setItem(row, 8, QTableWidgetItem(str(data['Killed']['Ship']['Count'])))
-            self.statsTable.setItem(row, 9, QTableWidgetItem(str(data['Killed']['SAM/AAA']['Count'])))
-            self.statsTable.setItem(row, 10, QTableWidgetItem(str(data['Killed']['Tank']['Count'])))
-            self.statsTable.setItem(row, 11, QTableWidgetItem(str(data['Killed']['Car']['Count'])))
-            self.statsTable.setItem(row, 12, QTableWidgetItem(str(data['Killed']['Infantry']['Count'])))
-            self.statsTable.setItem(row, 13, QTableWidgetItem(str(data['FriendlyFire']['Count'])))
-            self.statsTable.setItem(row, 14, QTableWidgetItem(str(data['Hit']['Count'])))
-            self.statsTable.setItem(row, 15, QTableWidgetItem(str(data['Destroyed']['Count'])))
+            self.statsTable.setItem(row, 1, QTableWidgetItem(str(data['Fired']['Count'])))
+            self.statsTable.setItem(row, 2, QTableWidgetItem(str(data['Killed']['Aircraft']['Count'])))
+            self.statsTable.setItem(row, 3, QTableWidgetItem(str(data['Killed']['Helicopter']['Count'])))
+            self.statsTable.setItem(row, 4, QTableWidgetItem(str(data['Killed']['Ship']['Count'])))
+            self.statsTable.setItem(row, 5, QTableWidgetItem(str(data['Killed']['SAM/AAA']['Count'])))
+            self.statsTable.setItem(row, 6, QTableWidgetItem(str(data['Killed']['Tank']['Count'])))
+            self.statsTable.setItem(row, 7, QTableWidgetItem(str(data['Killed']['Car']['Count'])))
+            self.statsTable.setItem(row, 8, QTableWidgetItem(str(data['Killed']['Infantry']['Count'])))
+            self.statsTable.setItem(row, 9, QTableWidgetItem(str(data['FriendlyFire']['Count'])))
+            self.statsTable.setItem(row, 10, QTableWidgetItem(str(data['Hit']['Count'])))
+            self.statsTable.setItem(row, 11, QTableWidgetItem(str(data['Destroyed']['Count'])))
 
             # Set background color for even rows
             if row % 2 == 0:
-                for col in range(16):
+                for col in range(12):
                     self.statsTable.item(row, col).setBackground(QColor(236, 236, 236))
 
         self.statsTable.resizeColumnsToContents()
@@ -368,26 +354,17 @@ class TacviewApp(QMainWindow):
             with open(file_name, 'w', newline='', encoding='utf-8') as csvfile:
                 writer = csv.writer(csvfile)
                 
-                # Write mission info
-                writer.writerow(["Mission Information"])
-                writer.writerow(["Mission Name", self.missionName])
-                writer.writerow(["Mission Time", self.displayTime(self.startTime)])
-                writer.writerow(["Mission Duration", self.displayTime(self.duration)])
-                writer.writerow([])
-
                 # Write stats headers
                 headers = [
-                    "Pilot Name", "Aircraft", "Group", "Take-offs", "Landings", "Fired Armament",
-                    "Killed Aircraft", "Killed Helicopter", "Killed Ship", "Killed SAM/AAA",
-                    "Killed Tank", "Killed Car", "Killed Infantry", "Team Kills", "Hits", "Destroyed"
+                    "Pilot Name", "Fired Armament", "Killed Aircraft", "Killed Helicopter", "Killed Ship",
+                    "Killed SAM/AAA", "Killed Tank", "Killed Car", "Killed Infantry", "Team Kills", "Hits", "Destroyed"
                 ]
                 writer.writerow(headers)
 
                 # Write stats data
                 for pilot, data in self.stats.items():
                     row = [
-                        pilot, data['Aircraft'], data['Group'],
-                        data['TakeOffs']['Count'], data['Lands']['Count'], data['Fired']['Count'],
+                        pilot, data['Fired']['Count'],
                         data['Killed']['Aircraft']['Count'], data['Killed']['Helicopter']['Count'],
                         data['Killed']['Ship']['Count'], data['Killed']['SAM/AAA']['Count'],
                         data['Killed']['Tank']['Count'], data['Killed']['Car']['Count'],
@@ -395,19 +372,6 @@ class TacviewApp(QMainWindow):
                         data['Hit']['Count'], data['Destroyed']['Count']
                     ]
                     writer.writerow(row)
-
-                writer.writerow([])
-
-                # Write events headers
-                writer.writerow(["Events"])
-                writer.writerow(["Time", "Type", "Action"])
-
-                # Write events data
-                for event in self.events:
-                    time = self.displayTime(self.startTime + event['Time'])
-                    event_type = event['PrimaryObject'].get('Type', 'Unknown')
-                    action = self.format_event_action(event)
-                    writer.writerow([time, event_type, action])
 
             QMessageBox.information(self, "Export Successful", f"Data exported successfully to {file_name}")
         except Exception as e:
