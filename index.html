@@ -33,9 +33,9 @@
         }
         .controls {
             background-color: #2a2a2a;
-            padding: 10px;
+            padding: 20px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
         }
         .table-container {
@@ -57,8 +57,9 @@
             background-color: inherit;
         }
         #pilotStatsTable td {
-            white-space: normal;
-            word-wrap: break-word;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         #pilotStatsTable th {
             background-color: #333;
@@ -90,7 +91,7 @@
             border-color: #ffd700;
         }
         #missionSelector {
-            width: 100%;
+            width: 200px;
             margin-bottom: 20px;
             padding: 5px;
             background-color: #333;
@@ -100,13 +101,14 @@
         #aircraftFilter {
             margin-bottom: 20px;
             display: flex;
-            flex-direction: column;
+            flex-wrap: wrap;
+            justify-content: center;
             gap: 10px;
         }
         .aircraft-group {
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
+            align-items: center;
         }
         .aircraft-group-title {
             font-weight: bold;
@@ -180,7 +182,6 @@
                 <tr>
                     <th>Pilot Name</th>
                     <th>Aircraft</th>
-                    <th>Fired Armament</th>
                     <th>Killed Aircraft</th>
                     <th>Killed Helicopter</th>
                     <th>Killed Ship</th>
@@ -188,6 +189,7 @@
                     <th>Killed Tank</th>
                     <th>Killed Car</th>
                     <th>Team Kills</th>
+                    <th>Fired Armament</th>
                     <th>Hits</th>
                     <th>Destroyed</th>
                 </tr>
@@ -318,8 +320,23 @@
                 scrollCollapse: true,
                 autoWidth: false,
                 columnDefs: [
-                    { width: '200px', targets: [0, 1] },
-                    { width: 'auto', targets: '_all' }
+                    { width: '120px', targets: 0 },  // Pilot Name
+                    { width: '100px', targets: 1 },  // Aircraft
+                    { width: '80px', targets: '_all' }
+                ],
+                columns: [
+                    { data: 'pilotName' },
+                    { data: 'aircraft' },
+                    { data: 'killedAircraft' },
+                    { data: 'killedHelicopter' },
+                    { data: 'killedShip' },
+                    { data: 'killedSAM' },
+                    { data: 'killedTank' },
+                    { data: 'killedCar' },
+                    { data: 'teamKills' },
+                    { data: 'firedArmament' },
+                    { data: 'hits' },
+                    { data: 'destroyed' }
                 ]
             });
         });
