@@ -263,7 +263,7 @@
                     checkbox.value = aircraft;
                     checkbox.checked = true;
                     checkbox.id = `aircraft-${aircraft.replace(/\s+/g, '-')}`;
-                    checkbox.addEventListener('change', filterTable);
+                    checkbox.addEventListener('change', filterStats);
                     label.htmlFor = checkbox.id;
                     label.appendChild(checkbox);
                     label.appendChild(document.createTextNode(aircraft));
@@ -272,21 +272,6 @@
                 
                 filterContainer.appendChild(groupDiv);
             });
-        }
-
-        function filterTable() {
-            const table = $('#pilotStatsTable').DataTable();
-            const selectedAircraft = Array.from(document.querySelectorAll('#aircraftFilter input:checked')).map(cb => cb.value);
-            
-            $.fn.dataTable.ext.search.push(
-                function(settings, data, dataIndex) {
-                    const aircraft = data[1]; // Assuming aircraft is in the second column
-                    return selectedAircraft.includes(aircraft);
-                }
-            );
-            
-            table.draw();
-            $.fn.dataTable.ext.search.pop();
         }
 
         function displayPilotStatsTable(stats) {
@@ -299,9 +284,9 @@
         }
 
         $(document).ready(function() {
-            $('#pilotStatsTable').DataTable({
+            const table = $('#pilotStatsTable').DataTable({
                 paging: false,
-                searching: true,
+                searching: false,
                 ordering: true,
                 info: false,
                 scrollY: '60vh',
@@ -328,6 +313,8 @@
                     { data: 'destroyed', title: 'Destroyed' }
                 ]
             });
+
+            $('#statsSearchInput').on('keyup', filterStats);
         });
     </script>
 </body>
