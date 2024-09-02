@@ -281,7 +281,7 @@ class TacviewApp(QMainWindow):
 
     def displayStats(self):
         self.statsTable.clear()
-        self.statsTable.setColumnCount(11)
+        self.statsTable.setColumnCount(12)
         self.statsTable.setHorizontalHeaderLabels([
             self.language.L("pilotName"), self.language.L("firedArmement"),
             self.language.L("killedAircraft"), self.language.L("killedHelo"), self.language.L("killedShip"),
@@ -292,23 +292,25 @@ class TacviewApp(QMainWindow):
         self.statsTable.setRowCount(len(self.stats))
 
         for row, (pilot, data) in enumerate(self.stats.items()):
-            self.statsTable.setItem(row, 0, QTableWidgetItem(pilot))
-            self.statsTable.setItem(row, 1, QTableWidgetItem(str(data['Fired']['Count'])))
-            self.statsTable.setItem(row, 2, QTableWidgetItem(str(data['Killed']['Aircraft']['Count'])))
-            self.statsTable.setItem(row, 3, QTableWidgetItem(str(data['Killed']['Helicopter']['Count'])))
-            self.statsTable.setItem(row, 4, QTableWidgetItem(str(data['Killed']['Ship']['Count'])))
-            self.statsTable.setItem(row, 5, QTableWidgetItem(str(data['Killed']['SAM/AAA']['Count'])))
-            self.statsTable.setItem(row, 6, QTableWidgetItem(str(data['Killed']['Tank']['Count'])))
-            self.statsTable.setItem(row, 7, QTableWidgetItem(str(data['Killed']['Car']['Count'])))
-            self.statsTable.setItem(row, 8, QTableWidgetItem(str(data['Killed']['Infantry']['Count'])))
-            self.statsTable.setItem(row, 9, QTableWidgetItem(str(data['FriendlyFire']['Count'])))
-            self.statsTable.setItem(row, 10, QTableWidgetItem(str(data['Hit']['Count'])))
-            self.statsTable.setItem(row, 11, QTableWidgetItem(str(data['Destroyed']['Count'])))
+            items = [
+                QTableWidgetItem(pilot),
+                QTableWidgetItem(str(data['Fired']['Count'])),
+                QTableWidgetItem(str(data['Killed']['Aircraft']['Count'])),
+                QTableWidgetItem(str(data['Killed']['Helicopter']['Count'])),
+                QTableWidgetItem(str(data['Killed']['Ship']['Count'])),
+                QTableWidgetItem(str(data['Killed']['SAM/AAA']['Count'])),
+                QTableWidgetItem(str(data['Killed']['Tank']['Count'])),
+                QTableWidgetItem(str(data['Killed']['Car']['Count'])),
+                QTableWidgetItem(str(data['Killed']['Infantry']['Count'])),
+                QTableWidgetItem(str(data['FriendlyFire']['Count'])),
+                QTableWidgetItem(str(data['Hit']['Count'])),
+                QTableWidgetItem(str(data['Destroyed']['Count']))
+            ]
 
-            # Set background color for even rows
-            if row % 2 == 0:
-                for col in range(12):
-                    self.statsTable.item(row, col).setBackground(QColor(236, 236, 236))
+            for col, item in enumerate(items):
+                self.statsTable.setItem(row, col, item)
+                if row % 2 == 0:
+                    item.setBackground(QColor(236, 236, 236))
 
         self.statsTable.resizeColumnsToContents()
         self.statsTable.setSortingEnabled(True)
