@@ -331,9 +331,9 @@
         function displayDeploymentStats(data) {
             const container = document.querySelector('.container');
             container.innerHTML = `
-                <h1>Deployment Stats</h1>
-                <button onclick="location.reload()">Back to Main Page</button>
-                <table id="deploymentStatsTable">
+                <h1 style="color: #ffd700;">Deployment Stats</h1>
+                <button class="modern-button" onclick="location.reload()">Back to Main Page</button>
+                <table id="deploymentStatsTable" class="display">
                     <thead>
                         <tr>
                             <th>Pilot Name</th>
@@ -373,6 +373,40 @@
                     autoWidth: false
                 });
             });
+
+            // Apply the dark theme to the deployment stats page
+            document.body.style.backgroundColor = '#1a1a1a';
+            document.body.style.color = '#e0e0e0';
+
+            // Style the table to match the main page
+            const table = document.getElementById('deploymentStatsTable');
+            table.style.width = '100%';
+            table.style.borderCollapse = 'collapse';
+            table.style.marginTop = '20px';
+
+            const cells = table.getElementsByTagName('td');
+            for (let i = 0; i < cells.length; i++) {
+                cells[i].style.border = '1px solid #444';
+                cells[i].style.padding = '8px';
+                cells[i].style.textAlign = 'left';
+                cells[i].style.backgroundColor = i % 2 === 0 ? '#2a2a2a' : '#333';
+            }
+
+            const headers = table.getElementsByTagName('th');
+            for (let i = 0; i < headers.length; i++) {
+                headers[i].style.backgroundColor = '#333';
+                headers[i].style.color = '#ffd700';
+                headers[i].style.border = '1px solid #444';
+                headers[i].style.padding = '8px';
+                headers[i].style.textAlign = 'left';
+            }
+
+            // Style the DataTables elements
+            const dtWrapper = document.querySelector('.dataTables_wrapper');
+            if (dtWrapper) {
+                const dtElements = dtWrapper.querySelectorAll('.dataTables_length, .dataTables_filter, .dataTables_info, .dataTables_processing, .dataTables_paginate');
+                dtElements.forEach(el => el.style.color = '#e0e0e0');
+            }
         }
     </script>
 </body>
