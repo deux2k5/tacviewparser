@@ -286,8 +286,6 @@ def main():
     ex.show()
     sys.exit(app.exec_())
 
-if __name__ == '__main__':
-    main()
     def format_event_action(self, event):
         action_text = f"{event['PrimaryObject'].get('Name', 'Unknown')} ({event['PrimaryObject'].get('Pilot', 'Unknown')}) {self.language.L(event['Action'])}"
         
@@ -306,3 +304,6 @@ if __name__ == '__main__':
                 action_text += f" by {event['SecondaryObject'].get('Pilot', 'Unknown')}"
         
         return action_text
+
+if __name__ == '__main__':
+    main()
