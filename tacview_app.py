@@ -131,9 +131,17 @@ class TacviewApp(QMainWindow):
         tree = ET.parse(file_path)
         root = tree.getroot()
 
-        self.missionName = root.find('Title').text if root.find('Title') is not None else 'Unknown Mission'
-        self.startTime = self.parse_time(root.find('MissionTime').text) if root.find('MissionTime') is not None else 0
-        self.duration = int(root.find('Duration').text) if root.find('Duration') is not None else 0
+        flight_recording = root.find('FlightRecording')
+        self.source = flight_recording.find('Source').text if flight_recording.find('Source') is not None else 'Unknown'
+        self.recorder = flight_recording.find('Recorder').text if flight_recording.find('Recorder') is not None else 'Unknown'
+        self.recordingTime = flight_recording.find('RecordingTime').text if flight_recording.find('RecordingTime') is not None else 'Unknown'
+        self.author = flight_recording.find('Author').text if flight_recording.find('Author') is not None else 'Unknown'
+
+        mission = root.find('Mission')
+        self.missionName = mission.find('Title').text if mission.find('Title') is not None else 'Unknown Mission'
+        self.missionCategory = mission.find('Category').text if mission.find('Category') is not None else 'Unknown'
+        self.startTime = self.parse_time(mission.find('MissionTime').text) if mission.find('MissionTime') is not None else 0
+        self.duration = float(mission.find('Duration').text) if mission.find('Duration') is not None else 0
 
         for event in root.findall('.//Event'):
             event_data = {
@@ -209,16 +217,25 @@ class TacviewApp(QMainWindow):
 
         infoLayout.addWidget(QLabel(f"<h1>{self.language.L('information')}</h1>"))
         
-        infoTable = QTableWidget(3, 2)
-        infoTable.setHorizontalHeaderLabels([self.language.L('missionName'), self.language.L('missionTime'), self.language.L('missionDuration')])
-        infoTable.setVerticalHeaderLabels([self.language.L('missionName'), self.language.L('missionTime'), self.language.L('missionDuration')])
+        infoTable = QTableWidget(10, 2)
+        infoTable.setHorizontalHeaderLabels(['Property', 'Value'])
         
-        infoTable.setItem(0, 0, QTableWidgetItem(self.language.L('missionName')))
-        infoTable.setItem(0, 1, QTableWidgetItem(self.missionName))
-        infoTable.setItem(1, 0, QTableWidgetItem(self.language.L('missionTime')))
-        infoTable.setItem(1, 1, QTableWidgetItem(self.displayTime(self.startTime)))
-        infoTable.setItem(2, 0, QTableWidgetItem(self.language.L('missionDuration')))
-        infoTable.setItem(2, 1, QTableWidgetItem(self.displayTime(self.duration)))
+        properties = [
+            ('Source', self.source),
+            ('Recorder', self.recorder),
+            ('Recording Time', self.recordingTime),
+            ('Author', self.author),
+            ('Mission Name', self.missionName),
+            ('Mission Category', self.missionCategory),
+            ('Mission Time', self.displayTime(self.startTime)),
+            ('Mission Duration', self.displayTime(self.duration)),
+            ('Start Time (Unix)', str(self.startTime)),
+            ('Duration (seconds)', str(self.duration))
+        ]
+        
+        for row, (prop, value) in enumerate(properties):
+            infoTable.setItem(row, 0, QTableWidgetItem(prop))
+            infoTable.setItem(row, 1, QTableWidgetItem(value))
         
         infoTable.resizeColumnsToContents()
         infoTable.resizeRowsToContents()
