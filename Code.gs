@@ -59,7 +59,7 @@ function getMissionData(missionNumber) {
 function getAvailableMissions() {
   var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheets = spreadsheet.getSheets();
-  var missions = ['Overall'];
+  var missions = [];
   
   for (var i = 0; i < sheets.length; i++) {
     var sheetName = sheets[i].getName();
@@ -70,4 +70,41 @@ function getAvailableMissions() {
   }
   
   return missions;
+}
+
+function getOverallStats() {
+  var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheet = spreadsheet.getSheetByName('Overall');
+  
+  if (sheet) {
+    var data = sheet.getDataRange().getValues();
+    
+    var pilotStats = [];
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      if (row[0] !== "") {  // Skip empty rows
+        pilotStats.push({
+          pilotName: row[0],
+          aircraft: row[1] || "0",
+          firedArmament: parseInt(row[2]) || 0,
+          killedAircraft: parseInt(row[3]) || 0,
+          killedHelicopter: parseInt(row[4]) || 0,
+          killedShip: parseInt(row[5]) || 0,
+          killedSAM: parseInt(row[6]) || 0,
+          killedTank: parseInt(row[7]) || 0,
+          killedCar: parseInt(row[8]) || 0,
+          killedInfantry: parseInt(row[9]) || 0,
+          teamKills: parseInt(row[10]) || 0,
+          hits: parseInt(row[11]) || 0,
+          destroyed: parseInt(row[12]) || 0
+        });
+      }
+    }
+    
+    return {
+      pilotStats: pilotStats
+    };
+  }
+  
+  return null;
 }

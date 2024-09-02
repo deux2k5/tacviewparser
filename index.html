@@ -146,6 +146,8 @@
         
         <select id="missionSelector"></select>
         
+        <button id="overallStatsButton">Overall Statistics</button>
+        
         <div id="aircraftFilter"></div>
         
         <table id="pilotStatsTable" class="display">
@@ -178,10 +180,12 @@
         function initializeMissions(availableMissions) {
             const missionSelector = document.getElementById('missionSelector');
             availableMissions.forEach(mission => {
-                const option = document.createElement('option');
-                option.value = mission;
-                option.textContent = mission === 'Overall' ? 'Overall' : `Mission ${mission}`;
-                missionSelector.appendChild(option);
+                if (mission !== 'Overall') {
+                    const option = document.createElement('option');
+                    option.value = mission;
+                    option.textContent = `Mission ${mission}`;
+                    missionSelector.appendChild(option);
+                }
             });
 
             missionSelector.addEventListener('change', (event) => {
@@ -191,11 +195,28 @@
             if (availableMissions.length > 0) {
                 loadMission(availableMissions[0]);
             }
+
+            const overallStatsButton = document.getElementById('overallStatsButton');
+            overallStatsButton.addEventListener('click', loadOverallStats);
         }
 
         function loadMission(missionNumber) {
             currentMission = missionNumber;
             google.script.run.withSuccessHandler(displayData).getMissionData(missionNumber);
+        }
+
+        function loadOverallStats() {
+            google.script.run.withSuccessHandler(displayOverallStats).getOverallStats();
+        }
+
+        function displayOverallStats(data) {
+            if (data) {
+                displayPilotStatsTable(data.pilotStats);
+                updateAircraftFilter();
+                document.getElementById('missionSelector').value = '';
+            } else {
+                alert('Overall statistics not found');
+            }
         }
 
         function displayData(data) {
