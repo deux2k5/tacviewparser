@@ -87,17 +87,35 @@
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
+            justify-content: center;
         }
         #aircraftFilter label {
             display: flex;
             align-items: center;
-            background-color: #333;
-            padding: 5px 10px;
-            border-radius: 5px;
+            background-color: #444;
+            padding: 8px 12px;
+            border-radius: 20px;
             cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        #aircraftFilter label:hover {
+            background-color: #555;
+            transform: scale(1.05);
         }
         #aircraftFilter input[type="checkbox"] {
-            margin-right: 5px;
+            display: none;
+        }
+        #aircraftFilter label::before {
+            content: '';
+            width: 12px;
+            height: 12px;
+            border: 2px solid #ffd700;
+            border-radius: 50%;
+            margin-right: 8px;
+            transition: background-color 0.3s;
+        }
+        #aircraftFilter input[type="checkbox"]:checked + label::before {
+            background-color: #ffd700;
         }
         #pilotStatsTable {
             width: 100% !important;
@@ -177,7 +195,10 @@
         }
 
         function updateAircraftFilter(stats) {
-            const aircraftTypes = [...new Set(stats.map(pilot => pilot.aircraft))];
+            const allowedAircraft = ['F-15E', 'F-14B', 'F/A-18C', 'F-16C', 'AH-64D', 'OH-58D', 'CH-47', 'A-10A', 'A-10C', 'A-10C II'];
+            const aircraftTypes = [...new Set(stats.map(pilot => pilot.aircraft))].filter(aircraft => 
+                allowedAircraft.some(allowed => aircraft.includes(allowed))
+            );
             const filterContainer = document.getElementById('aircraftFilter');
             filterContainer.innerHTML = '';
             aircraftTypes.forEach(aircraft => {
@@ -186,7 +207,9 @@
                 checkbox.type = 'checkbox';
                 checkbox.value = aircraft;
                 checkbox.checked = true;
+                checkbox.id = `aircraft-${aircraft.replace(/\s+/g, '-')}`;
                 checkbox.addEventListener('change', filterTable);
+                label.htmlFor = checkbox.id;
                 label.appendChild(checkbox);
                 label.appendChild(document.createTextNode(aircraft));
                 filterContainer.appendChild(label);
@@ -238,8 +261,9 @@
                 info: false,
                 scrollY: '60vh',
                 scrollCollapse: true,
-                autoWidth: true,
+                autoWidth: false,
                 columnDefs: [
+                    { width: '150px', targets: [0, 1] },
                     { width: 'auto', targets: '_all' }
                 ]
             });
