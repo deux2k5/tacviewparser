@@ -211,10 +211,13 @@ class TacviewApp(QMainWindow):
         
         infoTable = QTableWidget(3, 2)
         infoTable.setHorizontalHeaderLabels([self.language.L('missionName'), self.language.L('missionTime'), self.language.L('missionDuration')])
-        infoTable.setVerticalHeaderLabels(['', '', ''])
+        infoTable.setVerticalHeaderLabels([self.language.L('missionName'), self.language.L('missionTime'), self.language.L('missionDuration')])
         
+        infoTable.setItem(0, 0, QTableWidgetItem(self.language.L('missionName')))
         infoTable.setItem(0, 1, QTableWidgetItem(self.missionName))
+        infoTable.setItem(1, 0, QTableWidgetItem(self.language.L('missionTime')))
         infoTable.setItem(1, 1, QTableWidgetItem(self.displayTime(self.startTime)))
+        infoTable.setItem(2, 0, QTableWidgetItem(self.language.L('missionDuration')))
         infoTable.setItem(2, 1, QTableWidgetItem(self.displayTime(self.duration)))
         
         infoTable.resizeColumnsToContents()
