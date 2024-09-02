@@ -23,16 +23,17 @@ function getMissionData(missionNumber) {
     for (var i = 1; i < data.length; i++) {
       pilotStats.push({
         pilotName: data[i][0],
-        firedArmament: parseInt(data[i][1]),
-        killedAircraft: parseInt(data[i][2]),
-        killedHelicopter: parseInt(data[i][3]),
-        killedShip: parseInt(data[i][4]),
-        killedSAM: parseInt(data[i][5]),
-        killedTank: parseInt(data[i][6]),
-        killedCar: parseInt(data[i][7]),
-        teamKills: parseInt(data[i][8]),
-        hits: parseInt(data[i][9]),
-        destroyed: parseInt(data[i][10])
+        aircraft: data[i][1],
+        firedArmament: parseInt(data[i][2]),
+        killedAircraft: parseInt(data[i][3]),
+        killedHelicopter: parseInt(data[i][4]),
+        killedShip: parseInt(data[i][5]),
+        killedSAM: parseInt(data[i][6]),
+        killedTank: parseInt(data[i][7]),
+        killedCar: parseInt(data[i][8]),
+        teamKills: parseInt(data[i][9]),
+        hits: parseInt(data[i][10]),
+        destroyed: parseInt(data[i][11])
       });
     }
     

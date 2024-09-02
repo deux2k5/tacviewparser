@@ -95,6 +95,7 @@
             <thead>
                 <tr>
                     <th>Pilot Name</th>
+                    <th>Aircraft</th>
                     <th>Fired Armament</th>
                     <th>Killed Aircraft</th>
                     <th>Killed Helicopter</th>
@@ -153,6 +154,7 @@
             stats.forEach(pilot => {
                 table.row.add([
                     pilot.pilotName,
+                    pilot.aircraft,
                     pilot.firedArmament,
                     pilot.killedAircraft,
                     pilot.killedHelicopter,
