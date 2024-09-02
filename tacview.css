@@ -1,13 +1,14 @@
 body
 {
 	background-color: black;
+	color: #e0e0e0;
 }
 
 table
 {
 	font: 11px geneva,verdana,arial,sans-serif;
-	background-color: white;
-	color: black;
+	background-color: #333;
+	color: #e0e0e0;
 	border-collapse: collapse;
 	text-align: center;
 	vertical-align: middle;
@@ -17,7 +18,7 @@ table
 
 h1
 {
-	color: white;
+	color: #ffd700;
 	font-size: 24px;
 	font-weight: 700;
 	margin-bottom: 20px;
@@ -26,17 +27,17 @@ h1
 
 h2
 {
-	color: black;
-	font-size: 24px;
+	color: #ffd700;
+	font-size: 20px;
 	font-weight: 700;
-	margin-bottom: 20px;
-	margin-top: 20px;
+	margin-bottom: 15px;
+	margin-top: 15px;
 	text-align: center;
 }
 
 td, th
 {
-	border: 1px solid black;
+	border: 1px solid #555;
 	padding: 5px;
 	border-collapse: collapse;
 }
@@ -48,15 +49,16 @@ p
 
 a:hover
 {
-	color: black;
+	color: #ffd700;
 }
 
 span
 {
 	font-weight: 700;
-	display:inline-block;
+	display: inline-block;
 	margin-top: 10px;
-
+	font-size: 14px;
+	color: #ffd700;
 }
 
 /* PRESENTATION TABLE */
