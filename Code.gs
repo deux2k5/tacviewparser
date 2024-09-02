@@ -31,10 +31,9 @@ function getMissionData(missionNumber) {
         killedSAM: parseInt(data[i][6]),
         killedTank: parseInt(data[i][7]),
         killedCar: parseInt(data[i][8]),
-        killedInfantry: parseInt(data[i][9]),
-        teamKills: parseInt(data[i][10]),
-        hits: parseInt(data[i][11]),
-        destroyed: parseInt(data[i][12])
+        teamKills: parseInt(data[i][9]),
+        hits: parseInt(data[i][10]),
+        destroyed: parseInt(data[i][11])
       });
     }
     
