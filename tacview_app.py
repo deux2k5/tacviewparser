@@ -46,8 +46,6 @@ class Language:
         return self.translations.get(key, key)
 
 class TacviewApp(QMainWindow):
-
-class TacviewApp(QMainWindow):
     def __init__(self):
         super().__init__()
         self.language = Language()
