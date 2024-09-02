@@ -10,9 +10,7 @@ function getMissionData(missionNumber) {
   var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet;
   
-  if (missionNumber === 'Deployment Overall') {
-    sheet = spreadsheet.getSheetByName('Overall');
-  } else if (missionNumber === 'Overall') {
+  if (missionNumber === 'Deployment Overall' || missionNumber === 'Overall') {
     sheet = spreadsheet.getSheetByName('Overall');
   } else {
     sheet = spreadsheet.getSheetByName('Mission ' + missionNumber);

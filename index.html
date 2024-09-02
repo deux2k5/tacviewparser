@@ -180,7 +180,8 @@
             availableMissions.forEach(mission => {
                 const option = document.createElement('option');
                 option.value = mission;
-                option.textContent = `Mission ${mission}`;
+                option.textContent = mission === 'Deployment Overall' ? 'Deployment Overall' :
+                                     mission === 'Overall' ? 'Overall' : `Mission ${mission}`;
                 missionSelector.appendChild(option);
             });
 
