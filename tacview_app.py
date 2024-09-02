@@ -2,19 +2,61 @@ import sys
 import os
 import xml.etree.ElementTree as ET
 from datetime import datetime
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QVBoxLayout, QWidget, QPushButton, QFileDialog, QTableWidget, QTableWidgetItem, QTabWidget
-from PyQt5.QtGui import QFont, QColor
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QVBoxLayout, QWidget, QPushButton, QFileDialog, QTableWidget, QTableWidgetItem, QTabWidget, QLabel, QHBoxLayout
+from PyQt5.QtGui import QFont, QColor, QPixmap
 from PyQt5.QtCore import Qt
+
+class Language:
+    def __init__(self):
+        self.translations = {
+            'information': 'Information',
+            'missionName': 'Mission Name',
+            'missionTime': 'Mission Time',
+            'missionDuration': 'Mission Duration',
+            'statsByPilot': 'Statistics by Pilot',
+            'pilotName': 'Pilot Name',
+            'aircraft': 'Aircraft',
+            'group': 'Group',
+            'takeoff': 'Take-off',
+            'landing': 'Landing',
+            'firedArmement': 'Fired Armament',
+            'killedAircraft': 'Killed Aircraft',
+            'killedHelo': 'Killed Helicopter',
+            'killedShip': 'Killed Ship',
+            'killedSAM': 'Killed SAM/AAA',
+            'killedTank': 'Killed Tank',
+            'killedCar': 'Killed Car',
+            'killedInfantry': 'Killed Infantry',
+            'teamKill': 'Team Kill',
+            'hit': 'Hit',
+            'destroyed': 'Destroyed',
+            'events': 'Events',
+            'time': 'Time',
+            'type': 'Type',
+            'action': 'Action',
+            'nothing': 'Nothing',
+            'takeoff_long': 'Take-off',
+            'landing_long': 'Landing',
+            'firedArmement_long': 'Fired Armament',
+            'hitBy': 'Hit By',
+            'pilotStats': 'Pilot Statistics',
+        }
+
+    def L(self, key):
+        return self.translations.get(key, key)
+
+class TacviewApp(QMainWindow):
 
 class TacviewApp(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.language = {}
+        self.language = Language()
         self.events = []
         self.stats = {}
         self.missionName = ""
         self.startTime = 0
         self.duration = 0
+        self.image_path = "objectIcons/"
         self.initUI()
 
     def initUI(self):
@@ -26,16 +68,19 @@ class TacviewApp(QMainWindow):
         self.tabWidget = QTabWidget()
         layout.addWidget(self.tabWidget)
 
-        self.infoTextEdit = QTextEdit()
-        self.infoTextEdit.setReadOnly(True)
-        self.infoTextEdit.setFont(QFont('Courier', 10))
-        self.tabWidget.addTab(self.infoTextEdit, "Mission Info")
+        # Mission Info Tab
+        self.infoWidget = QWidget()
+        infoLayout = QVBoxLayout()
+        self.infoWidget.setLayout(infoLayout)
+        self.tabWidget.addTab(self.infoWidget, self.language.L("information"))
 
+        # Statistics Tab
         self.statsTable = QTableWidget()
-        self.tabWidget.addTab(self.statsTable, "Statistics")
+        self.tabWidget.addTab(self.statsTable, self.language.L("statsByPilot"))
 
+        # Events Tab
         self.eventsTable = QTableWidget()
-        self.tabWidget.addTab(self.eventsTable, "Events")
+        self.tabWidget.addTab(self.eventsTable, self.language.L("events"))
 
         openButton = QPushButton('Open XML File')
         openButton.clicked.connect(self.openFile)
@@ -76,6 +121,8 @@ class TacviewApp(QMainWindow):
             self.events.append(event_data)
             self.update_stats(event_data)
 
+        self.events.sort(key=lambda x: x['Time'])
+
     def parse_object(self, obj):
         if obj is None:
             return None
@@ -90,46 +137,75 @@ class TacviewApp(QMainWindow):
             self.stats[pilot] = {
                 'Aircraft': event['PrimaryObject'].get('Name', 'Unknown'),
                 'Group': event['PrimaryObject'].get('Group', 'Unknown'),
-                'TakeOffs': 0,
-                'Lands': 0,
-                'Fired': 0,
-                'Hit': 0,
-                'Destroyed': 0,
-                'Killed': {'Aircraft': 0, 'Helicopter': 0, 'Ship': 0, 'SAM/AAA': 0, 'Tank': 0, 'Car': 0, 'Infantry': 0},
-                'FriendlyFire': 0
+                'TakeOffs': {'Count': 0},
+                'Lands': {'Count': 0},
+                'Fired': {'Count': 0},
+                'Hit': {'Count': 0},
+                'Destroyed': {'Count': 0},
+                'Killed': {'Aircraft': {'Count': 0}, 'Helicopter': {'Count': 0}, 'Ship': {'Count': 0}, 
+                           'SAM/AAA': {'Count': 0}, 'Tank': {'Count': 0}, 'Car': {'Count': 0}, 'Infantry': {'Count': 0}},
+                'FriendlyFire': {'Count': 0}
             }
 
         if event['Action'] == 'HasTakenOff':
-            self.stats[pilot]['TakeOffs'] += 1
+            self.stats[pilot]['TakeOffs']['Count'] += 1
+            airport = event['Airport']['Name'] if event['Airport'] else 'No Airport'
+            self.stats[pilot]['TakeOffs'][airport] = self.stats[pilot]['TakeOffs'].get(airport, 0) + 1
         elif event['Action'] == 'HasLanded':
-            self.stats[pilot]['Lands'] += 1
+            self.stats[pilot]['Lands']['Count'] += 1
+            airport = event['Airport']['Name'] if event['Airport'] else 'No Airport'
+            self.stats[pilot]['Lands'][airport] = self.stats[pilot]['Lands'].get(airport, 0) + 1
         elif event['Action'] == 'HasFired':
-            self.stats[pilot]['Fired'] += 1
+            self.stats[pilot]['Fired']['Count'] += 1
+            weapon = event['SecondaryObject']['Name']
+            self.stats[pilot]['Fired'][weapon] = self.stats[pilot]['Fired'].get(weapon, 0) + 1
         elif event['Action'] == 'HasBeenHitBy':
-            self.stats[pilot]['Hit'] += 1
+            self.stats[pilot]['Hit']['Count'] += 1
+            weapon = event['SecondaryObject']['Name']
+            self.stats[pilot]['Hit'][weapon] = self.stats[pilot]['Hit'].get(weapon, 0) + 1
         elif event['Action'] == 'HasBeenDestroyed':
-            self.stats[pilot]['Destroyed'] += 1
+            self.stats[pilot]['Destroyed']['Count'] += 1
             if event['SecondaryObject'] and 'Pilot' in event['SecondaryObject']:
                 killer = event['SecondaryObject']['Pilot']
                 if killer in self.stats:
                     object_type = event['PrimaryObject']['Type']
-                    if object_type not in self.stats[killer]['Killed']:
-                        self.stats[killer]['Killed'][object_type] = 0
-                    self.stats[killer]['Killed'][object_type] += 1
+                    self.stats[killer]['Killed'][object_type]['Count'] += 1
+                    object_name = event['PrimaryObject']['Name']
+                    self.stats[killer]['Killed'][object_type][object_name] = self.stats[killer]['Killed'][object_type].get(object_name, 0) + 1
                     if event['PrimaryObject'].get('Coalition') == event['SecondaryObject'].get('Coalition'):
-                        self.stats[killer]['FriendlyFire'] += 1
+                        self.stats[killer]['FriendlyFire']['Count'] += 1
+                        self.stats[killer]['FriendlyFire'][object_name] = self.stats[killer]['FriendlyFire'].get(object_name, 0) + 1
 
     def displayMissionInfo(self):
-        info = f"Mission Name: {self.missionName}\n"
-        info += f"Start Time: {self.displayTime(self.startTime)}\n"
-        info += f"Duration: {self.displayTime(self.duration)}\n"
-        self.infoTextEdit.setText(info)
+        infoLayout = self.infoWidget.layout()
+        for i in reversed(range(infoLayout.count())): 
+            infoLayout.itemAt(i).widget().setParent(None)
+
+        infoLayout.addWidget(QLabel(f"<h1>{self.language.L('information')}</h1>"))
+        
+        infoTable = QTableWidget(3, 2)
+        infoTable.setHorizontalHeaderLabels([self.language.L('missionName'), self.language.L('missionTime'), self.language.L('missionDuration')])
+        infoTable.setVerticalHeaderLabels(['', '', ''])
+        
+        infoTable.setItem(0, 1, QTableWidgetItem(self.missionName))
+        infoTable.setItem(1, 1, QTableWidgetItem(self.displayTime(self.startTime)))
+        infoTable.setItem(2, 1, QTableWidgetItem(self.displayTime(self.duration)))
+        
+        infoTable.resizeColumnsToContents()
+        infoTable.resizeRowsToContents()
+        
+        infoLayout.addWidget(infoTable)
 
     def displayStats(self):
-        self.statsTable.setColumnCount(17)
+        self.statsTable.clear()
+        self.statsTable.setColumnCount(16)
         self.statsTable.setHorizontalHeaderLabels([
-            "Pilot", "Aircraft", "Group", "Take-offs", "Landings", "Fired", "Aircraft Kills",
-            "Helo Kills", "Ship Kills", "SAM Kills", "Tank Kills", "Car Kills", "Infantry Kills", "Team Kills", "Hit", "Destroyed"
+            self.language.L("pilotName"), self.language.L("aircraft"), self.language.L("group"),
+            self.language.L("takeoff"), self.language.L("landing"), self.language.L("firedArmement"),
+            self.language.L("killedAircraft"), self.language.L("killedHelo"), self.language.L("killedShip"),
+            self.language.L("killedSAM"), self.language.L("killedTank"), self.language.L("killedCar"),
+            self.language.L("killedInfantry"), self.language.L("teamKill"), self.language.L("hit"),
+            self.language.L("destroyed")
         ])
         self.statsTable.setRowCount(len(self.stats))
 
@@ -137,25 +213,31 @@ class TacviewApp(QMainWindow):
             self.statsTable.setItem(row, 0, QTableWidgetItem(pilot))
             self.statsTable.setItem(row, 1, QTableWidgetItem(data['Aircraft']))
             self.statsTable.setItem(row, 2, QTableWidgetItem(data['Group']))
-            self.statsTable.setItem(row, 3, QTableWidgetItem(str(data['TakeOffs'])))
-            self.statsTable.setItem(row, 4, QTableWidgetItem(str(data['Lands'])))
-            self.statsTable.setItem(row, 5, QTableWidgetItem(str(data['Fired'])))
-            self.statsTable.setItem(row, 6, QTableWidgetItem(str(data['Killed'].get('Aircraft', 0))))
-            self.statsTable.setItem(row, 7, QTableWidgetItem(str(data['Killed'].get('Helicopter', 0))))
-            self.statsTable.setItem(row, 8, QTableWidgetItem(str(data['Killed'].get('Ship', 0))))
-            self.statsTable.setItem(row, 9, QTableWidgetItem(str(data['Killed'].get('SAM/AAA', 0))))
-            self.statsTable.setItem(row, 10, QTableWidgetItem(str(data['Killed'].get('Tank', 0))))
-            self.statsTable.setItem(row, 11, QTableWidgetItem(str(data['Killed'].get('Car', 0))))
-            self.statsTable.setItem(row, 12, QTableWidgetItem(str(data['Killed'].get('Infantry', 0))))
-            self.statsTable.setItem(row, 13, QTableWidgetItem(str(data['FriendlyFire'])))
-            self.statsTable.setItem(row, 14, QTableWidgetItem(str(data['Hit'])))
-            self.statsTable.setItem(row, 15, QTableWidgetItem(str(data['Destroyed'])))
+            self.statsTable.setItem(row, 3, QTableWidgetItem(str(data['TakeOffs']['Count'])))
+            self.statsTable.setItem(row, 4, QTableWidgetItem(str(data['Lands']['Count'])))
+            self.statsTable.setItem(row, 5, QTableWidgetItem(str(data['Fired']['Count'])))
+            self.statsTable.setItem(row, 6, QTableWidgetItem(str(data['Killed']['Aircraft']['Count'])))
+            self.statsTable.setItem(row, 7, QTableWidgetItem(str(data['Killed']['Helicopter']['Count'])))
+            self.statsTable.setItem(row, 8, QTableWidgetItem(str(data['Killed']['Ship']['Count'])))
+            self.statsTable.setItem(row, 9, QTableWidgetItem(str(data['Killed']['SAM/AAA']['Count'])))
+            self.statsTable.setItem(row, 10, QTableWidgetItem(str(data['Killed']['Tank']['Count'])))
+            self.statsTable.setItem(row, 11, QTableWidgetItem(str(data['Killed']['Car']['Count'])))
+            self.statsTable.setItem(row, 12, QTableWidgetItem(str(data['Killed']['Infantry']['Count'])))
+            self.statsTable.setItem(row, 13, QTableWidgetItem(str(data['FriendlyFire']['Count'])))
+            self.statsTable.setItem(row, 14, QTableWidgetItem(str(data['Hit']['Count'])))
+            self.statsTable.setItem(row, 15, QTableWidgetItem(str(data['Destroyed']['Count'])))
+
+            # Set background color for even rows
+            if row % 2 == 0:
+                for col in range(16):
+                    self.statsTable.item(row, col).setBackground(QColor(236, 236, 236))
 
         self.statsTable.resizeColumnsToContents()
 
     def displayEvents(self):
+        self.eventsTable.clear()
         self.eventsTable.setColumnCount(3)
-        self.eventsTable.setHorizontalHeaderLabels(["Time", "Type", "Action"])
+        self.eventsTable.setHorizontalHeaderLabels([self.language.L("time"), self.language.L("type"), self.language.L("action")])
         self.eventsTable.setRowCount(len(self.events))
 
         for row, event in enumerate(self.events):
@@ -165,9 +247,7 @@ class TacviewApp(QMainWindow):
             type_item = QTableWidgetItem(event['PrimaryObject'].get('Type', 'Unknown'))
             self.eventsTable.setItem(row, 1, type_item)
 
-            action_text = f"{event['PrimaryObject'].get('Name', 'Unknown')} ({event['PrimaryObject'].get('Pilot', 'Unknown')}) {event['Action']}"
-            if event['Action'] in ['HasFired', 'HasBeenHitBy']:
-                action_text += f" {event['SecondaryObject'].get('Name', 'Unknown')}"
+            action_text = self.format_event_action(event)
             action_item = QTableWidgetItem(action_text)
             self.eventsTable.setItem(row, 2, action_item)
 
@@ -182,6 +262,9 @@ class TacviewApp(QMainWindow):
         if event['Action'] == 'HasBeenDestroyed':
             return QColor(211, 211, 211)  # Light gray
         elif event['Action'] == 'HasBeenHitBy':
+            if (event['PrimaryObject'].get('Coalition') == event['SecondaryObject'].get('Coalition') and
+                event['PrimaryObject'].get('Coalition') is not None):
+                return QColor(255, 215, 181)  # Light orange (for friendly fire)
             return QColor(255, 254, 224)  # Light yellow
         elif event['PrimaryObject'].get('Coalition') == 'Allies':
             return QColor(249, 216, 214)  # Light red
@@ -207,3 +290,21 @@ def main():
 
 if __name__ == '__main__':
     main()
+    def format_event_action(self, event):
+        action_text = f"{event['PrimaryObject'].get('Name', 'Unknown')} ({event['PrimaryObject'].get('Pilot', 'Unknown')}) {self.language.L(event['Action'])}"
+        
+        if event['Action'] == 'HasLanded' or event['Action'] == 'HasTakenOff':
+            if event['Airport']:
+                action_text += f" {event['Airport'].get('Name', 'Unknown Airport')}"
+            elif event['SecondaryObject'] and event['SecondaryObject'].get('Type') == 'Carrier':
+                action_text += f" {event['SecondaryObject'].get('Name', 'Unknown Carrier')}"
+        elif event['Action'] in ['HasFired', 'HasBeenHitBy']:
+            if event['SecondaryObject']:
+                action_text += f" {event['SecondaryObject'].get('Name', 'Unknown')}"
+            if event['Action'] == 'HasBeenHitBy' and event['ParentObject']:
+                action_text += f" [{event['ParentObject'].get('Name', 'Unknown')} ({event['ParentObject'].get('Pilot', 'Unknown')})]"
+        elif event['Action'] == 'HasBeenDestroyed':
+            if event['SecondaryObject'] and 'Pilot' in event['SecondaryObject']:
+                action_text += f" by {event['SecondaryObject'].get('Pilot', 'Unknown')}"
+        
+        return action_text
