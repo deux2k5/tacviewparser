@@ -29,18 +29,14 @@
             margin: 10px 0;
         }
         #logo {
-            max-width: 150px;
+            max-width: 135px;
         }
-        .main-content {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-        .sidebar {
-            width: 250px;
-            padding: 20px;
+        .controls {
             background-color: #2a2a2a;
-            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         .table-container {
             flex: 1;
@@ -148,6 +144,7 @@
         #pilotStatsTable {
             width: 100% !important;
             font-size: 14px;
+            table-layout: auto;
         }
         .dataTables_wrapper {
             height: 100%;
@@ -157,6 +154,9 @@
         .dataTables_scroll {
             flex: 1;
             overflow: auto;
+        }
+        .dataTables_scrollHead {
+            overflow: visible !important;
         }
         .dataTables_wrapper .dataTables_filter input {
             background-color: #333;
@@ -170,12 +170,11 @@
         <img id="logo" src="https://i.imgur.com/GCZp8XS.png" alt="USLANTCOM Logo">
         <h1>OGA Kill Tracker</h1>
     </div>
-    <div class="main-content">
-        <div class="sidebar">
-            <select id="missionSelector"></select>
-            <div id="aircraftFilter"></div>
-        </div>
-        <div class="table-container">
+    <div class="controls">
+        <select id="missionSelector"></select>
+        <div id="aircraftFilter"></div>
+    </div>
+    <div class="table-container">
             <table id="pilotStatsTable" class="display">
             <thead>
                 <tr>
@@ -238,7 +237,7 @@
 
         function updateAircraftFilter(stats) {
             const aircraftGroups = {
-                'Air Force': ['F-15E', 'F-16C', 'A-10C', 'A-10C II'],
+                'Air Force': ['F-15E', 'F-16C', 'A-10C'],
                 'Army': ['AH-64D', 'OH-58D', 'CH-47'],
                 'Navy': ['F-14B', 'F/A-18C']
             };
