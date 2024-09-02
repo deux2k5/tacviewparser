@@ -2,7 +2,7 @@ import sys
 import os
 import xml.etree.ElementTree as ET
 from datetime import datetime
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QVBoxLayout, QWidget, QPushButton, QFileDialog, QTableWidget, QTableWidgetItem, QTabWidget, QLabel, QHBoxLayout, QLineEdit
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QVBoxLayout, QWidget, QPushButton, QFileDialog, QTableWidget, QTableWidgetItem, QTabWidget, QLabel, QHBoxLayout, QLineEdit, QCheckBox, QScrollArea
 from PyQt5.QtGui import QFont, QColor, QPixmap
 from PyQt5.QtCore import Qt, QSortFilterProxyModel
 
@@ -75,6 +75,11 @@ class TacviewApp(QMainWindow):
         # Statistics Tab
         statsWidget = QWidget()
         statsLayout = QVBoxLayout()
+        
+        # Add aircraft filter
+        self.aircraftFilter = self.createAircraftFilter()
+        statsLayout.addWidget(self.aircraftFilter)
+        
         self.statsSearchInput = QLineEdit()
         self.statsSearchInput.setPlaceholderText("Search pilots...")
         self.statsSearchInput.textChanged.connect(self.filterStats)
@@ -106,10 +111,34 @@ class TacviewApp(QMainWindow):
         container.setLayout(layout)
         self.setCentralWidget(container)
 
-    def filterStats(self, text):
+    def createAircraftFilter(self):
+        scrollArea = QScrollArea()
+        scrollArea.setWidgetResizable(True)
+        scrollArea.setMaximumHeight(100)
+
+        containerWidget = QWidget()
+        layout = QHBoxLayout(containerWidget)
+
+        self.aircraftCheckboxes = {}
+        for aircraft in set(stat['Aircraft'] for stat in self.stats.values()):
+            checkbox = QCheckBox(aircraft)
+            checkbox.setChecked(True)
+            checkbox.stateChanged.connect(self.filterStats)
+            self.aircraftCheckboxes[aircraft] = checkbox
+            layout.addWidget(checkbox)
+
+        scrollArea.setWidget(containerWidget)
+        return scrollArea
+
+    def filterStats(self, text=''):
         for row in range(self.statsTable.rowCount()):
             pilot = self.statsTable.item(row, 0).text().lower()
-            self.statsTable.setRowHidden(row, text.lower() not in pilot)
+            aircraft = self.statsTable.item(row, 1).text()
+            
+            pilot_match = text.lower() in pilot if isinstance(text, str) else True
+            aircraft_match = self.aircraftCheckboxes[aircraft].isChecked() if aircraft in self.aircraftCheckboxes else True
+            
+            self.statsTable.setRowHidden(row, not (pilot_match and aircraft_match))
 
     def filterEvents(self, text):
         for row in range(self.eventsTable.rowCount()):
@@ -254,6 +283,15 @@ class TacviewApp(QMainWindow):
             self.language.L("destroyed")
         ])
         self.statsTable.setRowCount(len(self.stats))
+
+        # Update aircraft filter
+        for aircraft in set(data['Aircraft'] for data in self.stats.values()):
+            if aircraft not in self.aircraftCheckboxes:
+                checkbox = QCheckBox(aircraft)
+                checkbox.setChecked(True)
+                checkbox.stateChanged.connect(self.filterStats)
+                self.aircraftCheckboxes[aircraft] = checkbox
+                self.aircraftFilter.widget().layout().addWidget(checkbox)
 
         for row, (pilot, data) in enumerate(self.stats.items()):
             self.statsTable.setItem(row, 0, QTableWidgetItem(pilot))
