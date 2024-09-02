@@ -14,21 +14,38 @@
             color: #e0e0e0;
             margin: 0;
             padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+        .header {
+            background-color: #2a2a2a;
+            padding: 10px;
+            text-align: center;
         }
         h1 {
-            text-align: center;
             color: #ffd700;
             font-size: 24px;
+            margin: 10px 0;
         }
         #logo {
-            display: block;
-            margin: 0 auto;
-            max-width: 200px;
+            max-width: 150px;
+        }
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        .sidebar {
+            width: 250px;
+            padding: 20px;
+            background-color: #2a2a2a;
+            overflow-y: auto;
+        }
+        .table-container {
+            flex: 1;
+            overflow: auto;
+            padding: 20px;
         }
         #pilotStatsTable {
             width: 100%;
@@ -77,6 +94,7 @@
             border-color: #ffd700;
         }
         #missionSelector {
+            width: 100%;
             margin-bottom: 20px;
             padding: 5px;
             background-color: #333;
@@ -86,9 +104,8 @@
         #aircraftFilter {
             margin-bottom: 20px;
             display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
+            flex-direction: column;
+            gap: 10px;
         }
         .aircraft-group {
             display: flex;
@@ -130,6 +147,16 @@
         }
         #pilotStatsTable {
             width: 100% !important;
+            font-size: 14px;
+        }
+        .dataTables_wrapper {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .dataTables_scroll {
+            flex: 1;
+            overflow: auto;
         }
         .dataTables_wrapper .dataTables_filter input {
             background-color: #333;
@@ -139,15 +166,17 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="header">
         <img id="logo" src="https://i.imgur.com/GCZp8XS.png" alt="USLANTCOM Logo">
         <h1>OGA Kill Tracker</h1>
-        
-        <select id="missionSelector"></select>
-        
-        <div id="aircraftFilter"></div>
-        
-        <table id="pilotStatsTable" class="display">
+    </div>
+    <div class="main-content">
+        <div class="sidebar">
+            <select id="missionSelector"></select>
+            <div id="aircraftFilter"></div>
+        </div>
+        <div class="table-container">
+            <table id="pilotStatsTable" class="display">
             <thead>
                 <tr>
                     <th>Pilot Name</th>
@@ -166,6 +195,8 @@
             </thead>
             <tbody></tbody>
         </table>
+            </table>
+        </div>
     </div>
 
     <script>
