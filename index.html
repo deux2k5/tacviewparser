@@ -82,6 +82,31 @@
             color: #e0e0e0;
             border: 1px solid #ffd700;
         }
+        #aircraftFilter {
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        #aircraftFilter label {
+            display: flex;
+            align-items: center;
+            background-color: #333;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #aircraftFilter input[type="checkbox"] {
+            margin-right: 5px;
+        }
+        #pilotStatsTable {
+            width: 100% !important;
+        }
+        .dataTables_wrapper .dataTables_filter input {
+            background-color: #333;
+            color: #e0e0e0;
+            border: 1px solid #ffd700;
+        }
     </style>
 </head>
 <body>
@@ -90,6 +115,8 @@
         <h1>OGA Kill Tracker</h1>
         
         <select id="missionSelector"></select>
+        
+        <div id="aircraftFilter"></div>
         
         <table id="pilotStatsTable" class="display">
             <thead>
@@ -143,9 +170,42 @@
         function displayData(data) {
             if (data) {
                 displayPilotStatsTable(data.pilotStats);
+                updateAircraftFilter(data.pilotStats);
             } else {
                 alert('Mission data not found');
             }
+        }
+
+        function updateAircraftFilter(stats) {
+            const aircraftTypes = [...new Set(stats.map(pilot => pilot.aircraft))];
+            const filterContainer = document.getElementById('aircraftFilter');
+            filterContainer.innerHTML = '';
+            aircraftTypes.forEach(aircraft => {
+                const label = document.createElement('label');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = aircraft;
+                checkbox.checked = true;
+                checkbox.addEventListener('change', filterTable);
+                label.appendChild(checkbox);
+                label.appendChild(document.createTextNode(aircraft));
+                filterContainer.appendChild(label);
+            });
+        }
+
+        function filterTable() {
+            const table = $('#pilotStatsTable').DataTable();
+            const selectedAircraft = Array.from(document.querySelectorAll('#aircraftFilter input:checked')).map(cb => cb.value);
+            
+            $.fn.dataTable.ext.search.push(
+                function(settings, data, dataIndex) {
+                    const aircraft = data[1]; // Assuming aircraft is in the second column
+                    return selectedAircraft.includes(aircraft);
+                }
+            );
+            
+            table.draw();
+            $.fn.dataTable.ext.search.pop();
         }
 
         function displayPilotStatsTable(stats) {
@@ -168,7 +228,6 @@
                 ]);
             });
             table.draw();
-            table.columns.adjust().draw();
         }
 
         $(document).ready(function() {
@@ -179,10 +238,9 @@
                 info: false,
                 scrollY: '60vh',
                 scrollCollapse: true,
-                autoWidth: false,
+                autoWidth: true,
                 columnDefs: [
-                    { width: '20%', targets: 0 },
-                    { width: '8%', targets: '_all' }
+                    { width: 'auto', targets: '_all' }
                 ]
             });
         });
