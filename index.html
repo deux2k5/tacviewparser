@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tacview Mission Data</title>
+    <title>OGA Kill Tracker</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-gray-100">
     <div class="container mx-auto px-4 py-8">
-        <h1 class="text-4xl font-bold mb-8 text-center text-blue-600">Tacview Mission Data</h1>
+        <h1 class="text-4xl font-bold mb-8 text-center text-blue-600">OGA Kill Tracker</h1>
         
         <div id="missionTabs" class="mb-8"></div>
         
@@ -33,13 +33,14 @@
     </div>
 
     <script>
+        let missions = {};
         let currentMission = 1;
 
         google.script.run.withSuccessHandler(initializeMissions).getAvailableMissions();
 
-        function initializeMissions(missions) {
+        function initializeMissions(availableMissions) {
             const tabsContainer = document.getElementById('missionTabs');
-            missions.forEach(missionNumber => {
+            availableMissions.forEach(missionNumber => {
                 const tab = document.createElement('button');
                 tab.textContent = `Mission ${missionNumber}`;
                 tab.className = 'px-4 py-2 mr-2 mb-2 bg-blue-500 text-white rounded hover:bg-blue-600';
@@ -47,19 +48,23 @@
                 tabsContainer.appendChild(tab);
             });
 
-            loadMission(currentMission);
+            google.script.run.withSuccessHandler(function(data) {
+                missions = data;
+                loadMission(currentMission);
+            }).getMissionData();
         }
 
         function loadMission(missionNumber) {
             currentMission = missionNumber;
-            google.script.run.withSuccessHandler(displayData).getMissionData(missionNumber);
+            const data = missions[missionNumber];
+            if (data) {
+                displayData(data);
+            } else {
+                alert('Mission data not found');
+            }
         }
 
         function displayData(data) {
-            if (data === null) {
-                alert('Mission data not found');
-                return;
-            }
             displayMissionInfo(data.missionInfo);
             displayPilotStats(data.pilotStats);
             displayEventsTimeline(data.events);

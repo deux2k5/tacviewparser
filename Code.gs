@@ -4,75 +4,80 @@ function doGet() {
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
-function getMissionData(missionNumber) {
-  var folder = DriveApp.getFolderById('YOUR_FOLDER_ID'); // Replace with your folder ID
-  var files = folder.getFilesByName('mission' + missionNumber + '.csv');
+function getMissionData() {
+  var spreadsheet = SpreadsheetApp.openById('YOUR_SPREADSHEET_ID'); // Replace with your spreadsheet ID
+  var missions = {};
   
-  if (files.hasNext()) {
-    var file = files.next();
-    var csvData = Utilities.parseCsv(file.getBlob().getDataAsString());
+  var sheets = spreadsheet.getSheets();
+  for (var i = 0; i < sheets.length; i++) {
+    var sheet = sheets[i];
+    var sheetName = sheet.getName();
     
-    var missionInfo = {
-      missionName: csvData[1][1],
-      missionTime: csvData[2][1],
-      missionDuration: csvData[3][1]
-    };
-    
-    var pilotStats = [];
-    var i = 6;
-    while (i < csvData.length && csvData[i][0] !== '') {
-      pilotStats.push({
-        pilotName: csvData[i][0],
-        aircraft: csvData[i][1],
-        group: csvData[i][2],
-        takeoffs: parseInt(csvData[i][3]),
-        landings: parseInt(csvData[i][4]),
-        firedArmament: parseInt(csvData[i][5]),
-        killedAircraft: parseInt(csvData[i][6]),
-        killedHelicopter: parseInt(csvData[i][7]),
-        killedShip: parseInt(csvData[i][8]),
-        killedSAM: parseInt(csvData[i][9]),
-        killedTank: parseInt(csvData[i][10]),
-        killedCar: parseInt(csvData[i][11]),
-        killedInfantry: parseInt(csvData[i][12]),
-        teamKills: parseInt(csvData[i][13]),
-        hits: parseInt(csvData[i][14]),
-        destroyed: parseInt(csvData[i][15])
-      });
-      i++;
+    if (sheetName.startsWith('mission')) {
+      var missionNumber = sheetName.replace('mission', '');
+      var data = sheet.getDataRange().getValues();
+      
+      var missionInfo = {
+        missionName: data[1][1],
+        missionTime: data[2][1],
+        missionDuration: data[3][1]
+      };
+      
+      var pilotStats = [];
+      var j = 6;
+      while (j < data.length && data[j][0] !== '') {
+        pilotStats.push({
+          pilotName: data[j][0],
+          aircraft: data[j][1],
+          group: data[j][2],
+          takeoffs: parseInt(data[j][3]),
+          landings: parseInt(data[j][4]),
+          firedArmament: parseInt(data[j][5]),
+          killedAircraft: parseInt(data[j][6]),
+          killedHelicopter: parseInt(data[j][7]),
+          killedShip: parseInt(data[j][8]),
+          killedSAM: parseInt(data[j][9]),
+          killedTank: parseInt(data[j][10]),
+          killedCar: parseInt(data[j][11]),
+          killedInfantry: parseInt(data[j][12]),
+          teamKills: parseInt(data[j][13]),
+          hits: parseInt(data[j][14]),
+          destroyed: parseInt(data[j][15])
+        });
+        j++;
+      }
+      
+      var events = [];
+      j += 2; // Skip empty row and header
+      while (j < data.length && data[j][0] !== '') {
+        events.push({
+          time: data[j][0],
+          type: data[j][1],
+          action: data[j][2]
+        });
+        j++;
+      }
+      
+      missions[missionNumber] = {
+        missionInfo: missionInfo,
+        pilotStats: pilotStats,
+        events: events
+      };
     }
-    
-    var events = [];
-    i += 2; // Skip empty row and header
-    while (i < csvData.length && csvData[i][0] !== '') {
-      events.push({
-        time: csvData[i][0],
-        type: csvData[i][1],
-        action: csvData[i][2]
-      });
-      i++;
-    }
-    
-    return {
-      missionInfo: missionInfo,
-      pilotStats: pilotStats,
-      events: events
-    };
-  } else {
-    return null;
   }
+  
+  return missions;
 }
 
 function getAvailableMissions() {
-  var folder = DriveApp.getFolderById('YOUR_FOLDER_ID'); // Replace with your folder ID
-  var files = folder.getFilesByType(MimeType.CSV);
+  var spreadsheet = SpreadsheetApp.openById('YOUR_SPREADSHEET_ID'); // Replace with your spreadsheet ID
+  var sheets = spreadsheet.getSheets();
   var missions = [];
   
-  while (files.hasNext()) {
-    var file = files.next();
-    var match = file.getName().match(/mission(\d+)\.csv/);
-    if (match) {
-      missions.push(parseInt(match[1]));
+  for (var i = 0; i < sheets.length; i++) {
+    var sheetName = sheets[i].getName();
+    if (sheetName.startsWith('mission')) {
+      missions.push(parseInt(sheetName.replace('mission', '')));
     }
   }
   
