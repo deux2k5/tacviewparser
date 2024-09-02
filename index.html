@@ -39,12 +39,13 @@
         #pilotStatsTable th, #pilotStatsTable td {
             border: 1px solid #444;
             padding: 8px;
-            text-align: center;
+            text-align: left;
             color: #e0e0e0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
             background-color: inherit;
+        }
+        #pilotStatsTable td {
+            white-space: normal;
+            word-wrap: break-word;
         }
         #pilotStatsTable th {
             background-color: #333;
@@ -86,8 +87,18 @@
             margin-bottom: 20px;
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 20px;
             justify-content: center;
+        }
+        .aircraft-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .aircraft-group-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #ffd700;
         }
         #aircraftFilter label {
             display: flex;
@@ -195,24 +206,38 @@
         }
 
         function updateAircraftFilter(stats) {
-            const allowedAircraft = ['F-15E', 'F-14B', 'F/A-18C', 'F-16C', 'AH-64D', 'OH-58D', 'CH-47', 'A-10A', 'A-10C', 'A-10C II'];
-            const aircraftTypes = [...new Set(stats.map(pilot => pilot.aircraft))].filter(aircraft => 
-                allowedAircraft.some(allowed => aircraft.includes(allowed))
-            );
+            const aircraftGroups = {
+                'Air Force': ['F-15E', 'F-16C', 'A-10C', 'A-10C II'],
+                'Army': ['AH-64D', 'OH-58D', 'CH-47'],
+                'Navy': ['F-14B', 'F/A-18C']
+            };
             const filterContainer = document.getElementById('aircraftFilter');
             filterContainer.innerHTML = '';
-            aircraftTypes.forEach(aircraft => {
-                const label = document.createElement('label');
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.value = aircraft;
-                checkbox.checked = true;
-                checkbox.id = `aircraft-${aircraft.replace(/\s+/g, '-')}`;
-                checkbox.addEventListener('change', filterTable);
-                label.htmlFor = checkbox.id;
-                label.appendChild(checkbox);
-                label.appendChild(document.createTextNode(aircraft));
-                filterContainer.appendChild(label);
+            
+            Object.entries(aircraftGroups).forEach(([branch, aircraftList]) => {
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'aircraft-group';
+                
+                const groupTitle = document.createElement('div');
+                groupTitle.className = 'aircraft-group-title';
+                groupTitle.textContent = branch;
+                groupDiv.appendChild(groupTitle);
+                
+                aircraftList.forEach(aircraft => {
+                    const label = document.createElement('label');
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.value = aircraft;
+                    checkbox.checked = true;
+                    checkbox.id = `aircraft-${aircraft.replace(/\s+/g, '-')}`;
+                    checkbox.addEventListener('change', filterTable);
+                    label.htmlFor = checkbox.id;
+                    label.appendChild(checkbox);
+                    label.appendChild(document.createTextNode(aircraft));
+                    groupDiv.appendChild(label);
+                });
+                
+                filterContainer.appendChild(groupDiv);
             });
         }
 
@@ -263,7 +288,7 @@
                 scrollCollapse: true,
                 autoWidth: false,
                 columnDefs: [
-                    { width: '150px', targets: [0, 1] },
+                    { width: '200px', targets: [0, 1] },
                     { width: 'auto', targets: '_all' }
                 ]
             });
