@@ -293,21 +293,7 @@
             const table = $('#pilotStatsTable').DataTable();
             table.clear();
             stats.forEach(pilot => {
-                table.row.add([
-                    pilot.pilotName,
-                    pilot.aircraft,
-                    pilot.firedArmament,
-                    pilot.killedAircraft,
-                    pilot.killedHelicopter,
-                    pilot.killedShip,
-                    pilot.killedSAM,
-                    pilot.killedTank,
-                    pilot.killedCar,
-                    pilot.killedInfantry,
-                    pilot.teamKills,
-                    pilot.hits,
-                    pilot.destroyed
-                ]);
+                table.row.add(pilot);
             });
             table.draw();
         }
@@ -327,19 +313,19 @@
                     { width: '80px', targets: '_all' }
                 ],
                 columns: [
-                    { data: 0, title: 'Pilot Name' },
-                    { data: 1, title: 'Aircraft' },
-                    { data: 2, title: 'Fired Armament' },
-                    { data: 3, title: 'Killed Aircraft' },
-                    { data: 4, title: 'Killed Helicopter' },
-                    { data: 5, title: 'Killed Ship' },
-                    { data: 6, title: 'Killed SAM/AAA' },
-                    { data: 7, title: 'Killed Tank' },
-                    { data: 8, title: 'Killed Car' },
-                    { data: 9, title: 'Killed Infantry' },
-                    { data: 10, title: 'Team Kills' },
-                    { data: 11, title: 'Hits' },
-                    { data: 12, title: 'Destroyed' }
+                    { data: 'pilotName', title: 'Pilot Name' },
+                    { data: 'aircraft', title: 'Aircraft' },
+                    { data: 'firedArmament', title: 'Fired Armament' },
+                    { data: 'killedAircraft', title: 'Killed Aircraft' },
+                    { data: 'killedHelicopter', title: 'Killed Helicopter' },
+                    { data: 'killedShip', title: 'Killed Ship' },
+                    { data: 'killedSAM', title: 'Killed SAM/AAA' },
+                    { data: 'killedTank', title: 'Killed Tank' },
+                    { data: 'killedCar', title: 'Killed Car' },
+                    { data: 'killedInfantry', title: 'Killed Infantry' },
+                    { data: 'teamKills', title: 'Team Kills' },
+                    { data: 'hits', title: 'Hits' },
+                    { data: 'destroyed', title: 'Destroyed' }
                 ]
             });
         });
