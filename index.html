@@ -14,34 +14,21 @@
             color: #e0e0e0;
             margin: 0;
             padding: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
         }
-        .header {
-            background-color: #2a2a2a;
-            padding: 10px;
-            text-align: center;
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
         }
         h1 {
+            text-align: center;
             color: #ffd700;
             font-size: 24px;
-            margin: 10px 0;
         }
         #logo {
-            max-width: 135px;
-        }
-        .controls {
-            background-color: #2a2a2a;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .table-container {
-            flex: 1;
-            overflow: auto;
-            padding: 20px;
+            display: block;
+            margin: 0 auto;
+            max-width: 200px;
         }
         #pilotStatsTable {
             width: 100%;
@@ -57,9 +44,8 @@
             background-color: inherit;
         }
         #pilotStatsTable td {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            white-space: normal;
+            word-wrap: break-word;
         }
         #pilotStatsTable th {
             background-color: #333;
@@ -91,7 +77,6 @@
             border-color: #ffd700;
         }
         #missionSelector {
-            width: 200px;
             margin-bottom: 20px;
             padding: 5px;
             background-color: #333;
@@ -102,13 +87,13 @@
             margin-bottom: 20px;
             display: flex;
             flex-wrap: wrap;
+            gap: 20px;
             justify-content: center;
-            gap: 10px;
         }
         .aircraft-group {
             display: flex;
             flex-direction: column;
-            align-items: center;
+            align-items: flex-start;
         }
         .aircraft-group-title {
             font-weight: bold;
@@ -145,20 +130,6 @@
         }
         #pilotStatsTable {
             width: 100% !important;
-            font-size: 14px;
-            table-layout: auto;
-        }
-        .dataTables_wrapper {
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-        .dataTables_scroll {
-            flex: 1;
-            overflow: auto;
-        }
-        .dataTables_scrollHead {
-            overflow: visible !important;
         }
         .dataTables_wrapper .dataTables_filter input {
             background-color: #333;
@@ -168,16 +139,14 @@
     </style>
 </head>
 <body>
-    <div class="header">
+    <div class="container">
         <img id="logo" src="https://i.imgur.com/GCZp8XS.png" alt="USLANTCOM Logo">
         <h1>OGA Kill Tracker</h1>
-    </div>
-    <div class="controls">
+        
         <select id="missionSelector"></select>
+        
         <div id="aircraftFilter"></div>
-        <input type="text" id="statsSearchInput" placeholder="Search pilots...">
-    </div>
-    <div class="table-container">
+        
         <table id="pilotStatsTable" class="display">
             <thead>
                 <tr>
@@ -187,10 +156,9 @@
                     <th>Killed Aircraft</th>
                     <th>Killed Helicopter</th>
                     <th>Killed Ship</th>
-                    <th>Killed SAM/AAA</th>
+                    <th>Killed SAM</th>
                     <th>Killed Tank</th>
                     <th>Killed Car</th>
-                    <th>Killed Infantry</th>
                     <th>Team Kills</th>
                     <th>Hits</th>
                     <th>Destroyed</th>
@@ -198,8 +166,6 @@
             </thead>
             <tbody></tbody>
         </table>
-            </table>
-        </div>
     </div>
 
     <script>
@@ -241,7 +207,7 @@
 
         function updateAircraftFilter(stats) {
             const aircraftGroups = {
-                'Air Force': ['F-15E', 'F-16C', 'A-10C'],
+                'Air Force': ['F-15E', 'F-16C', 'A-10C', 'A-10C II'],
                 'Army': ['AH-64D', 'OH-58D', 'CH-47'],
                 'Navy': ['F-14B', 'F/A-18C']
             };
@@ -264,7 +230,7 @@
                     checkbox.value = aircraft;
                     checkbox.checked = true;
                     checkbox.id = `aircraft-${aircraft.replace(/\s+/g, '-')}`;
-                    checkbox.addEventListener('change', filterStats);
+                    checkbox.addEventListener('change', filterTable);
                     label.htmlFor = checkbox.id;
                     label.appendChild(checkbox);
                     label.appendChild(document.createTextNode(aircraft));
@@ -275,56 +241,58 @@
             });
         }
 
+        function filterTable() {
+            const table = $('#pilotStatsTable').DataTable();
+            const selectedAircraft = Array.from(document.querySelectorAll('#aircraftFilter input:checked')).map(cb => cb.value);
+            
+            $.fn.dataTable.ext.search.push(
+                function(settings, data, dataIndex) {
+                    const aircraft = data[1]; // Assuming aircraft is in the second column
+                    return selectedAircraft.includes(aircraft);
+                }
+            );
+            
+            table.draw();
+            $.fn.dataTable.ext.search.pop();
+        }
+
         function displayPilotStatsTable(stats) {
             const table = $('#pilotStatsTable').DataTable();
             table.clear();
             stats.forEach(pilot => {
-                table.row.add(pilot);
+                table.row.add([
+                    pilot.pilotName,
+                    pilot.aircraft,
+                    pilot.firedArmament,
+                    pilot.killedAircraft,
+                    pilot.killedHelicopter,
+                    pilot.killedShip,
+                    pilot.killedSAM,
+                    pilot.killedTank,
+                    pilot.killedCar,
+                    pilot.teamKills,
+                    pilot.hits,
+                    pilot.destroyed
+                ]);
             });
             table.draw();
         }
 
-        function handleSearchInput() {
-            const searchText = $('#statsSearchInput').val().toLowerCase();
-            filterStats();
-        }
-
         $(document).ready(function() {
-            const table = $('#pilotStatsTable').DataTable({
+            $('#pilotStatsTable').DataTable({
                 paging: false,
-                searching: false,
+                searching: true,
                 ordering: true,
                 info: false,
                 scrollY: '60vh',
                 scrollCollapse: true,
                 autoWidth: false,
                 columnDefs: [
-                    { width: '120px', targets: 0 },  // Pilot Name
-                    { width: '100px', targets: 1 },  // Aircraft
-                    { width: '80px', targets: '_all' }
-                ],
-                columns: [
-                    { data: 'pilotName', title: 'Pilot Name' },
-                    { data: 'aircraft', title: 'Aircraft' },
-                    { data: 'firedArmament', title: 'Fired Armament' },
-                    { data: 'killedAircraft', title: 'Killed Aircraft' },
-                    { data: 'killedHelicopter', title: 'Killed Helicopter' },
-                    { data: 'killedShip', title: 'Killed Ship' },
-                    { data: 'killedSAM', title: 'Killed SAM/AAA' },
-                    { data: 'killedTank', title: 'Killed Tank' },
-                    { data: 'killedCar', title: 'Killed Car' },
-                    { data: 'killedInfantry', title: 'Killed Infantry' },
-                    { data: 'teamKills', title: 'Team Kills' },
-                    { data: 'hits', title: 'Hits' },
-                    { data: 'destroyed', title: 'Destroyed' }
+                    { width: '200px', targets: [0, 1] },
+                    { width: 'auto', targets: '_all' }
                 ]
             });
-
-            $('#statsSearchInput').on('keyup', filterStats);
         });
-
-        // Initial filter application
-        filterStats();
     </script>
 </body>
 </html>
