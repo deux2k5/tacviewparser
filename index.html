@@ -38,6 +38,7 @@
             border: 1px solid #444;
             padding: 8px;
             text-align: left;
+            color: #ffffff;
         }
         #pilotStatsTable th {
             background-color: #333;
@@ -64,12 +65,21 @@
             background: #ffd700;
             border-color: #ffd700;
         }
+        #missionSelector {
+            margin-bottom: 20px;
+            padding: 5px;
+            background-color: #333;
+            color: #ffffff;
+            border: 1px solid #ffd700;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <img id="logo" src="https://i.imgur.com/GCZp8XS.png" alt="USLANTCOM Logo">
         <h1>OGA Kill Tracker</h1>
+        
+        <select id="missionSelector"></select>
         
         <table id="pilotStatsTable" class="display">
             <thead>
@@ -97,6 +107,18 @@
         google.script.run.withSuccessHandler(initializeMissions).getAvailableMissions();
 
         function initializeMissions(availableMissions) {
+            const missionSelector = document.getElementById('missionSelector');
+            availableMissions.forEach(mission => {
+                const option = document.createElement('option');
+                option.value = mission;
+                option.textContent = `Mission ${mission}`;
+                missionSelector.appendChild(option);
+            });
+
+            missionSelector.addEventListener('change', (event) => {
+                loadMission(event.target.value);
+            });
+
             if (availableMissions.length > 0) {
                 loadMission(availableMissions[0]);
             }
@@ -138,10 +160,12 @@
 
         $(document).ready(function() {
             $('#pilotStatsTable').DataTable({
-                paging: true,
+                paging: false,
                 searching: true,
                 ordering: true,
-                info: true
+                info: false,
+                scrollY: '60vh',
+                scrollCollapse: true
             });
         });
     </script>
