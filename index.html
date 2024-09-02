@@ -123,10 +123,15 @@
             border: 2px solid #ffd700;
             border-radius: 50%;
             margin-right: 8px;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, border-color 0.3s;
         }
         #aircraftFilter input[type="checkbox"]:checked + label::before {
             background-color: #ffd700;
+            border-color: #ffd700;
+        }
+        #aircraftFilter input[type="checkbox"]:checked + label {
+            background-color: #666;
+            color: #ffd700;
         }
         #pilotStatsTable {
             width: 100% !important;
@@ -215,6 +220,8 @@
             }
         }
 
+        const defaultEnabledAircraft = ['F-15E', 'F-16C', 'A-10C', 'AH-64D', 'OH-58D', 'CH-47', 'F-14B', 'F/A-18C'];
+
         function updateAircraftFilter() {
             const filterContainer = document.getElementById('aircraftFilter');
             filterContainer.innerHTML = '';
@@ -224,7 +231,7 @@
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.value = aircraft;
-                checkbox.checked = true;
+                checkbox.checked = defaultEnabledAircraft.includes(aircraft);
                 checkbox.id = `aircraft-${aircraft.replace(/\s+/g, '-')}`;
                 checkbox.addEventListener('change', filterTable);
                 label.htmlFor = checkbox.id;
@@ -232,6 +239,7 @@
                 label.appendChild(document.createTextNode(aircraft));
                 filterContainer.appendChild(label);
             });
+            filterTable(); // Apply initial filtering
         }
 
         function filterTable() {
