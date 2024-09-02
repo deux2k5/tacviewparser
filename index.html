@@ -179,6 +179,7 @@
 
     <script>
         let currentMission = null;
+        const allowedAircraft = ['F-15E', 'F-16C', 'A-10C', 'AH-64D', 'OH-58D', 'CH-47', 'F-14B', 'F/A-18C'];
 
         google.script.run.withSuccessHandler(initializeMissions).getAvailableMissions();
 
@@ -208,41 +209,28 @@
         function displayData(data) {
             if (data) {
                 displayPilotStatsTable(data.pilotStats);
-                updateAircraftFilter(data.pilotStats);
+                updateAircraftFilter();
             } else {
                 alert('Mission data not found');
             }
         }
 
-        function updateAircraftFilter(stats) {
-            const allowedAircraft = ['F-15E', 'F-16C', 'A-10C', 'AH-64D', 'OH-58D', 'CH-47', 'F-14B', 'F/A-18C'];
+        function updateAircraftFilter() {
             const filterContainer = document.getElementById('aircraftFilter');
             filterContainer.innerHTML = '';
             
-            Object.entries(aircraftGroups).forEach(([branch, aircraftList]) => {
-                const groupDiv = document.createElement('div');
-                groupDiv.className = 'aircraft-group';
-                
-                const groupTitle = document.createElement('div');
-                groupTitle.className = 'aircraft-group-title';
-                groupTitle.textContent = branch;
-                groupDiv.appendChild(groupTitle);
-                
-                aircraftList.forEach(aircraft => {
-                    const label = document.createElement('label');
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.value = aircraft;
-                    checkbox.checked = true;
-                    checkbox.id = `aircraft-${aircraft.replace(/\s+/g, '-')}`;
-                    checkbox.addEventListener('change', filterTable);
-                    label.htmlFor = checkbox.id;
-                    label.appendChild(checkbox);
-                    label.appendChild(document.createTextNode(aircraft));
-                    groupDiv.appendChild(label);
-                });
-                
-                filterContainer.appendChild(groupDiv);
+            allowedAircraft.forEach(aircraft => {
+                const label = document.createElement('label');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = aircraft;
+                checkbox.checked = true;
+                checkbox.id = `aircraft-${aircraft.replace(/\s+/g, '-')}`;
+                checkbox.addEventListener('change', filterTable);
+                label.htmlFor = checkbox.id;
+                label.appendChild(checkbox);
+                label.appendChild(document.createTextNode(aircraft));
+                filterContainer.appendChild(label);
             });
         }
 
@@ -250,15 +238,7 @@
             const table = $('#pilotStatsTable').DataTable();
             const selectedAircraft = Array.from(document.querySelectorAll('#aircraftFilter input:checked')).map(cb => cb.value);
             
-            $.fn.dataTable.ext.search.push(
-                function(settings, data, dataIndex) {
-                    const aircraft = data[1]; // Assuming aircraft is in the second column
-                    return allowedAircraft.includes(aircraft) && selectedAircraft.includes(aircraft);
-                }
-            );
-            
-            table.draw();
-            $.fn.dataTable.ext.search.pop();
+            table.column(1).search(selectedAircraft.join('|'), true, false).draw();
         }
 
         function displayPilotStatsTable(stats) {
@@ -298,6 +278,8 @@
                 ],
                 order: [[11, 'desc']] // Sort by "Destroyed" column (index 11) in descending order
             });
+
+            updateAircraftFilter();
         });
     </script>
 </body>
