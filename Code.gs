@@ -1,3 +1,5 @@
+const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID'; // Replace with your spreadsheet ID
+
 function doGet() {
   return HtmlService.createHtmlOutputFromFile('index')
     .setTitle('Tacview Mission Data')
@@ -5,12 +7,11 @@ function doGet() {
 }
 
 function getMissionData(missionNumber) {
-  var folder = DriveApp.getFolderById('YOUR_FOLDER_ID'); // Replace with your folder ID
-  var files = folder.getFilesByName('mission' + missionNumber + '.csv');
+  var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheet = spreadsheet.getSheetByName('Mission ' + missionNumber);
   
-  if (files.hasNext()) {
-    var file = files.next();
-    var csvData = Utilities.parseCsv(file.getBlob().getDataAsString());
+  if (sheet) {
+    var data = sheet.getDataRange().getValues();
     
     var missionInfo = {
       missionName: "Mission " + missionNumber,
@@ -19,19 +20,19 @@ function getMissionData(missionNumber) {
     };
     
     var pilotStats = [];
-    for (var i = 1; i < csvData.length; i++) {
+    for (var i = 1; i < data.length; i++) {
       pilotStats.push({
-        pilotName: csvData[i][0],
-        firedArmament: parseInt(csvData[i][1]),
-        killedAircraft: parseInt(csvData[i][2]),
-        killedHelicopter: parseInt(csvData[i][3]),
-        killedShip: parseInt(csvData[i][4]),
-        killedSAM: parseInt(csvData[i][5]),
-        killedTank: parseInt(csvData[i][6]),
-        killedCar: parseInt(csvData[i][7]),
-        teamKills: parseInt(csvData[i][8]),
-        hits: parseInt(csvData[i][9]),
-        destroyed: parseInt(csvData[i][10])
+        pilotName: data[i][0],
+        firedArmament: parseInt(data[i][1]),
+        killedAircraft: parseInt(data[i][2]),
+        killedHelicopter: parseInt(data[i][3]),
+        killedShip: parseInt(data[i][4]),
+        killedSAM: parseInt(data[i][5]),
+        killedTank: parseInt(data[i][6]),
+        killedCar: parseInt(data[i][7]),
+        teamKills: parseInt(data[i][8]),
+        hits: parseInt(data[i][9]),
+        destroyed: parseInt(data[i][10])
       });
     }
     
@@ -45,14 +46,16 @@ function getMissionData(missionNumber) {
 }
 
 function getAvailableMissions() {
-  var folder = DriveApp.getFolderById('YOUR_FOLDER_ID'); // Replace with your folder ID
-  var files = folder.getFilesByName('mission*.csv');
+  var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheets = spreadsheet.getSheets();
   var missions = [];
   
-  while (files.hasNext()) {
-    var fileName = files.next().getName();
-    var missionNumber = parseInt(fileName.replace('mission', '').replace('.csv', ''));
-    missions.push(missionNumber);
+  for (var i = 0; i < sheets.length; i++) {
+    var sheetName = sheets[i].getName();
+    if (sheetName.startsWith('Mission ')) {
+      var missionNumber = parseInt(sheetName.replace('Mission ', ''));
+      missions.push(missionNumber);
+    }
   }
   
   return missions.sort((a, b) => a - b);
