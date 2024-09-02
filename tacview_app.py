@@ -56,6 +56,7 @@ class TacviewApp(QMainWindow):
         self.startTime = 0
         self.duration = 0
         self.image_path = "objectIcons/"
+        self.aircraft_types = set()
         self.initUI()
 
     def initUI(self):
@@ -128,7 +129,7 @@ class TacviewApp(QMainWindow):
         layout = QHBoxLayout(containerWidget)
 
         self.aircraftCheckboxes = {}
-        for aircraft in set(stat['Aircraft'] for stat in self.stats.values()):
+        for aircraft in self.aircraft_types:
             checkbox = QCheckBox(aircraft)
             checkbox.setChecked(True)
             checkbox.stateChanged.connect(self.filterStats)
@@ -204,9 +205,12 @@ class TacviewApp(QMainWindow):
             return
 
         pilot = event['PrimaryObject']['Pilot']
+        aircraft = event['PrimaryObject'].get('Name', 'Unknown')
+        self.aircraft_types.add(aircraft)
+
         if pilot not in self.stats:
             self.stats[pilot] = {
-                'Aircraft': event['PrimaryObject'].get('Name', 'Unknown'),
+                'Aircraft': aircraft,
                 'Group': event['PrimaryObject'].get('Group', 'Unknown'),
                 'TakeOffs': {'Count': 0},
                 'Lands': {'Count': 0},
@@ -217,6 +221,9 @@ class TacviewApp(QMainWindow):
                            'SAM/AAA': {'Count': 0}, 'Tank': {'Count': 0}, 'Car': {'Count': 0}, 'Infantry': {'Count': 0}},
                 'FriendlyFire': {'Count': 0}
             }
+        elif self.stats[pilot]['Aircraft'] != aircraft:
+            # If the pilot changes aircraft, update the aircraft type
+            self.stats[pilot]['Aircraft'] = aircraft
 
         if event['Action'] == 'HasTakenOff':
             self.stats[pilot]['TakeOffs']['Count'] += 1
@@ -281,9 +288,9 @@ class TacviewApp(QMainWindow):
 
     def displayStats(self):
         self.statsTable.clear()
-        self.statsTable.setColumnCount(12)
+        self.statsTable.setColumnCount(13)
         self.statsTable.setHorizontalHeaderLabels([
-            self.language.L("pilotName"), self.language.L("firedArmement"),
+            self.language.L("pilotName"), self.language.L("aircraft"), self.language.L("firedArmement"),
             self.language.L("killedAircraft"), self.language.L("killedHelo"), self.language.L("killedShip"),
             self.language.L("killedSAM"), self.language.L("killedTank"), self.language.L("killedCar"),
             self.language.L("killedInfantry"), self.language.L("teamKill"), self.language.L("hit"),
@@ -294,6 +301,7 @@ class TacviewApp(QMainWindow):
         for row, (pilot, data) in enumerate(self.stats.items()):
             items = [
                 QTableWidgetItem(pilot),
+                QTableWidgetItem(data['Aircraft']),
                 QTableWidgetItem(str(data['Fired']['Count'])),
                 QTableWidgetItem(str(data['Killed']['Aircraft']['Count'])),
                 QTableWidgetItem(str(data['Killed']['Helicopter']['Count'])),
