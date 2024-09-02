@@ -53,3 +53,34 @@ To create a standalone executable:
 ## Note
 
 This application is designed to work with Tacview ACMI files in XML format. Ensure your Tacview Flight Logs are exported to XML before attempting to parse them with this tool.
+
+## Google Sheets Integration
+
+The Tacview Parser application includes functionality to integrate with Google Sheets for web-based viewing of mission data. This integration consists of two main components:
+
+1. **index.html**: This file contains the HTML and JavaScript code for the web interface. It provides a user-friendly way to view mission data stored in Google Sheets, including:
+   - A dropdown to select specific missions or view overall statistics
+   - A table displaying pilot statistics
+   - Filtering options for aircraft types
+   - A deployment stats view for overall mission performance
+
+2. **Code.gs**: This Google Apps Script file contains server-side functions that interact with the Google Sheets document storing the mission data. It includes functions to:
+   - Retrieve data for specific missions or overall statistics
+   - Get a list of available missions
+   - Fetch deployment stats
+
+### How it works with the exported CSV
+
+1. The Python-based Tacview Parser application exports mission data to a CSV file.
+2. This CSV file is then manually imported into a Google Sheets document.
+3. The Google Sheets document is structured with separate sheets for each mission (named "Mission X") and an "Overall" sheet for cumulative statistics.
+4. The Code.gs script reads data from these sheets when requested by the web interface.
+5. The index.html file provides a web-based interface to view and interact with this data, making API calls to the Google Apps Script functions.
+
+To use this integration:
+1. Export mission data from the Tacview Parser application to CSV.
+2. Import the CSV data into a Google Sheets document, maintaining the expected structure.
+3. Deploy the Code.gs script as a Google Apps Script project, updating the SPREADSHEET_ID constant with your Google Sheets document ID.
+4. Host the index.html file on a web server or use Google Apps Script to serve it.
+
+This integration allows for easy sharing and viewing of mission data through a web interface, complementing the desktop-based Tacview Parser application.
