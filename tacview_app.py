@@ -317,8 +317,7 @@ class TacviewApp(QMainWindow):
 
             for col, item in enumerate(items):
                 self.statsTable.setItem(row, col, item)
-                if row % 2 == 0:
-                    item.setBackground(QColor(236, 236, 236))
+                item.setBackground(QColor(236, 236, 236) if row % 2 == 0 else QColor(255, 255, 255))
 
         self.statsTable.resizeColumnsToContents()
         self.statsTable.setSortingEnabled(True)
