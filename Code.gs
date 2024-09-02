@@ -27,21 +27,24 @@ function getMissionData(missionNumber) {
     
     var pilotStats = [];
     for (var i = 1; i < data.length; i++) {
-      pilotStats.push({
-        pilotName: data[i][0],
-        aircraft: data[i][1],
-        firedArmament: parseInt(data[i][2]),
-        killedAircraft: parseInt(data[i][3]),
-        killedHelicopter: parseInt(data[i][4]),
-        killedShip: parseInt(data[i][5]),
-        killedSAM: parseInt(data[i][6]),
-        killedTank: parseInt(data[i][7]),
-        killedCar: parseInt(data[i][8]),
-        killedInfantry: parseInt(data[i][9]),
-        teamKills: parseInt(data[i][10]),
-        hits: parseInt(data[i][11]),
-        destroyed: parseInt(data[i][12])
-      });
+      var row = data[i];
+      if (row[0] !== "") {  // Skip empty rows
+        pilotStats.push({
+          pilotName: row[0],
+          aircraft: row[1] || "N/A",
+          firedArmament: parseInt(row[2]) || 0,
+          killedAircraft: parseInt(row[3]) || 0,
+          killedHelicopter: parseInt(row[4]) || 0,
+          killedShip: parseInt(row[5]) || 0,
+          killedSAM: parseInt(row[6]) || 0,
+          killedTank: parseInt(row[7]) || 0,
+          killedCar: parseInt(row[8]) || 0,
+          killedInfantry: parseInt(row[9]) || 0,
+          teamKills: parseInt(row[10]) || 0,
+          hits: parseInt(row[11]) || 0,
+          destroyed: parseInt(row[12]) || 0
+        });
+      }
     }
     
     return {
