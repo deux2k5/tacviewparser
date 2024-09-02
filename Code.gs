@@ -5,7 +5,7 @@ function doGet() {
 }
 
 function getMissionData() {
-  var spreadsheet = SpreadsheetApp.openById('YOUR_SPREADSHEET_ID'); // Replace with your spreadsheet ID
+  var spreadsheet = SpreadsheetApp.openById('1Z7EUD5tTSxRpiheonQqcAe2Tflnny4bnXRpkkyinums'); // Replace with your spreadsheet ID
   var missions = {};
   
   var sheets = spreadsheet.getSheets();
