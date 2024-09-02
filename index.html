@@ -34,12 +34,16 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            table-layout: fixed;
         }
         #pilotStatsTable th, #pilotStatsTable td {
             border: 1px solid #444;
             padding: 8px;
-            text-align: left;
+            text-align: center;
             color: #e0e0e0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         #pilotStatsTable th {
             background-color: #333;
@@ -48,6 +52,9 @@
         }
         #pilotStatsTable tr:nth-child(even) {
             background-color: #2a2a2a;
+        }
+        #pilotStatsTable tr:nth-child(odd) {
+            background-color: #333;
         }
         #pilotStatsTable tr:hover {
             background-color: #3a3a3a;
@@ -158,6 +165,7 @@
                 ]);
             });
             table.draw();
+            table.columns.adjust().draw();
         }
 
         $(document).ready(function() {
@@ -167,7 +175,12 @@
                 ordering: true,
                 info: false,
                 scrollY: '60vh',
-                scrollCollapse: true
+                scrollCollapse: true,
+                autoWidth: false,
+                columnDefs: [
+                    { width: '20%', targets: 0 },
+                    { width: '8%', targets: '_all' }
+                ]
             });
         });
     </script>
