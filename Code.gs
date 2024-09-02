@@ -7,12 +7,11 @@ function doGet() {
 }
 
 function getMissionData(missionNumber) {
-  var folder = DriveApp.getFolderById('YOUR_FOLDER_ID'); // Replace with the ID of the folder containing your CSV files
-  var files = folder.getFilesByName('mission_' + missionNumber + '.csv');
+  var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheet = spreadsheet.getSheetByName('Mission ' + missionNumber);
   
-  if (files.hasNext()) {
-    var file = files.next();
-    var csvData = Utilities.parseCsv(file.getBlob().getDataAsString());
+  if (sheet) {
+    var data = sheet.getDataRange().getValues();
     
     var missionInfo = {
       missionName: "Mission " + missionNumber,
@@ -21,21 +20,21 @@ function getMissionData(missionNumber) {
     };
     
     var pilotStats = [];
-    for (var i = 1; i < csvData.length; i++) {
+    for (var i = 1; i < data.length; i++) {
       pilotStats.push({
-        pilotName: csvData[i][0],
-        aircraft: csvData[i][1],
-        firedArmament: parseInt(csvData[i][2]),
-        killedAircraft: parseInt(csvData[i][3]),
-        killedHelicopter: parseInt(csvData[i][4]),
-        killedShip: parseInt(csvData[i][5]),
-        killedSAM: parseInt(csvData[i][6]),
-        killedTank: parseInt(csvData[i][7]),
-        killedCar: parseInt(csvData[i][8]),
-        killedInfantry: parseInt(csvData[i][9]),
-        teamKills: parseInt(csvData[i][10]),
-        hits: parseInt(csvData[i][11]),
-        destroyed: parseInt(csvData[i][12])
+        pilotName: data[i][0],
+        aircraft: data[i][1],
+        firedArmament: parseInt(data[i][2]),
+        killedAircraft: parseInt(data[i][3]),
+        killedHelicopter: parseInt(data[i][4]),
+        killedShip: parseInt(data[i][5]),
+        killedSAM: parseInt(data[i][6]),
+        killedTank: parseInt(data[i][7]),
+        killedCar: parseInt(data[i][8]),
+        killedInfantry: parseInt(data[i][9]),
+        teamKills: parseInt(data[i][10]),
+        hits: parseInt(data[i][11]),
+        destroyed: parseInt(data[i][12])
       });
     }
     
