@@ -365,7 +365,7 @@ class TacviewApp(QMainWindow):
                 
                 # Write stats headers
                 headers = [
-                    "Pilot Name", "Fired Armament", "Killed Aircraft", "Killed Helicopter", "Killed Ship",
+                    "Pilot Name", "Aircraft", "Fired Armament", "Killed Aircraft", "Killed Helicopter", "Killed Ship",
                     "Killed SAM/AAA", "Killed Tank", "Killed Car", "Killed Infantry", "Team Kills", "Hits", "Destroyed"
                 ]
                 writer.writerow(headers)
@@ -373,7 +373,7 @@ class TacviewApp(QMainWindow):
                 # Write stats data
                 for pilot, data in self.stats.items():
                     row = [
-                        pilot, data['Fired']['Count'],
+                        pilot, data['Aircraft'], data['Fired']['Count'],
                         data['Killed']['Aircraft']['Count'], data['Killed']['Helicopter']['Count'],
                         data['Killed']['Ship']['Count'], data['Killed']['SAM/AAA']['Count'],
                         data['Killed']['Tank']['Count'], data['Killed']['Car']['Count'],
