@@ -10,7 +10,9 @@ function getMissionData(missionNumber) {
   var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet;
   
-  if (missionNumber === 'Overall') {
+  if (missionNumber === 'Deployment Overall') {
+    sheet = spreadsheet.getSheetByName('Overall');
+  } else if (missionNumber === 'Overall') {
     sheet = spreadsheet.getSheetByName('Overall');
   } else {
     sheet = spreadsheet.getSheetByName('Mission ' + missionNumber);
@@ -20,7 +22,8 @@ function getMissionData(missionNumber) {
     var data = sheet.getDataRange().getValues();
     
     var missionInfo = {
-      missionName: missionNumber === 'Overall' ? "Overall Statistics" : "Mission " + missionNumber,
+      missionName: missionNumber === 'Deployment Overall' ? "Deployment Overall Statistics" :
+                   missionNumber === 'Overall' ? "Overall Statistics" : "Mission " + missionNumber,
       missionTime: "N/A",
       missionDuration: "N/A"
     };
@@ -56,7 +59,7 @@ function getMissionData(missionNumber) {
 function getAvailableMissions() {
   var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheets = spreadsheet.getSheets();
-  var missions = ['Overall'];
+  var missions = ['Deployment Overall', 'Overall'];
   
   for (var i = 0; i < sheets.length; i++) {
     var sheetName = sheets[i].getName();
