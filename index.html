@@ -289,7 +289,7 @@
             stats.forEach(pilot => {
                 table.row.add([
                     pilot.pilotName,
-                    pilot.aircraft,
+                    getAircraftDesignation(pilot.aircraft),
                     pilot.firedArmament,
                     pilot.killedAircraft,
                     pilot.killedHelicopter,
@@ -305,6 +305,18 @@
             table.draw();
         }
 
+        function getAircraftDesignation(aircraft) {
+            const designations = {
+                'F-15E Strike Eagle': 'F-15E',
+                'F-16C Fighting Falcon': 'F-16C',
+                'F-14B Tomcat': 'F-14B',
+                'A-10C Thunderbolt II': 'A-10C',
+                'F/A-18C Hornet': 'F/A-18C'
+                // Add more mappings as needed
+            };
+            return designations[aircraft] || aircraft;
+        }
+
         $(document).ready(function() {
             $('#pilotStatsTable').DataTable({
                 paging: false,
@@ -315,7 +327,8 @@
                 scrollCollapse: true,
                 autoWidth: false,
                 columnDefs: [
-                    { width: '200px', targets: [0, 1] },
+                    { width: '200px', targets: 0 },
+                    { width: '100px', targets: 1 },
                     { width: 'auto', targets: '_all' }
                 ],
                 order: [[11, 'desc']] // Sort by "Destroyed" column (index 11) in descending order
