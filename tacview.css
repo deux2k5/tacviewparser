@@ -119,6 +119,14 @@ th.statisticsTable
 {
 	background-color: #ECECEC;
 	text-transform: uppercase;
+	text-align: left;
+	padding-left: 5px;
+}
+
+td.statisticsTable
+{
+	text-align: left;
+	padding-left: 5px;
 }
 
 td.statisticsTable:nth-child(2)
