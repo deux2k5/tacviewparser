@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OGA Kill Tracker</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-gray-100">
@@ -23,6 +26,27 @@
                     <h2 class="text-2xl font-semibold mb-4">Pilot Statistics</h2>
                     <canvas id="pilotStatsChart"></canvas>
                 </div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-semibold mb-4">Detailed Pilot Statistics</h2>
+                <table id="pilotStatsTable" class="display">
+                    <thead>
+                        <tr>
+                            <th>Pilot Name</th>
+                            <th>Fired Armament</th>
+                            <th>Killed Aircraft</th>
+                            <th>Killed Helicopter</th>
+                            <th>Killed Ship</th>
+                            <th>Killed SAM</th>
+                            <th>Killed Tank</th>
+                            <th>Killed Car</th>
+                            <th>Team Kills</th>
+                            <th>Hits</th>
+                            <th>Destroyed</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -57,6 +81,7 @@
             if (data) {
                 displayMissionInfo(data.missionInfo);
                 displayPilotStats(data.pilotStats);
+                displayPilotStatsTable(data.pilotStats);
             } else {
                 alert('Mission data not found');
             }
@@ -101,6 +126,36 @@
                 }
             });
         }
+
+        function displayPilotStatsTable(stats) {
+            const table = $('#pilotStatsTable').DataTable();
+            table.clear();
+            stats.forEach(pilot => {
+                table.row.add([
+                    pilot.pilotName,
+                    pilot.firedArmament,
+                    pilot.killedAircraft,
+                    pilot.killedHelicopter,
+                    pilot.killedShip,
+                    pilot.killedSAM,
+                    pilot.killedTank,
+                    pilot.killedCar,
+                    pilot.teamKills,
+                    pilot.hits,
+                    pilot.destroyed
+                ]);
+            });
+            table.draw();
+        }
+
+        $(document).ready(function() {
+            $('#pilotStatsTable').DataTable({
+                paging: true,
+                searching: true,
+                ordering: true,
+                info: true
+            });
+        });
     </script>
 </body>
 </html>
