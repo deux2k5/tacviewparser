@@ -108,3 +108,15 @@ function getOverallStats() {
   
   return null;
 }
+
+function getDeploymentStats() {
+  var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheet = spreadsheet.getSheetByName('Overall');
+  
+  if (sheet) {
+    var data = sheet.getDataRange().getValues();
+    return data.slice(1).filter(row => row[0] !== "");  // Remove header and empty rows
+  }
+  
+  return null;
+}
