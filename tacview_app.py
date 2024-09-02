@@ -2,7 +2,8 @@ import sys
 import os
 import xml.etree.ElementTree as ET
 from datetime import datetime
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QVBoxLayout, QWidget, QPushButton, QFileDialog, QTableWidget, QTableWidgetItem, QTabWidget, QLabel, QHBoxLayout, QLineEdit, QCheckBox, QScrollArea
+import csv
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QVBoxLayout, QWidget, QPushButton, QFileDialog, QTableWidget, QTableWidgetItem, QTabWidget, QLabel, QHBoxLayout, QLineEdit, QCheckBox, QScrollArea, QMessageBox
 from PyQt5.QtGui import QFont, QColor, QPixmap
 from PyQt5.QtCore import Qt, QSortFilterProxyModel
 
@@ -103,9 +104,16 @@ class TacviewApp(QMainWindow):
         eventsWidget.setLayout(eventsLayout)
         self.tabWidget.addTab(eventsWidget, self.language.L("events"))
 
+        buttonLayout = QHBoxLayout()
         openButton = QPushButton('Open XML File')
         openButton.clicked.connect(self.openFile)
-        layout.addWidget(openButton)
+        buttonLayout.addWidget(openButton)
+
+        exportButton = QPushButton('Export to CSV')
+        exportButton.clicked.connect(self.export_to_csv)
+        buttonLayout.addWidget(exportButton)
+
+        layout.addLayout(buttonLayout)
 
         container = QWidget()
         container.setLayout(layout)
@@ -346,6 +354,64 @@ class TacviewApp(QMainWindow):
         self.eventsTable.setSortingEnabled(True)
         # Sort by time initially
         self.eventsTable.sortItems(0, Qt.AscendingOrder)
+
+    def export_to_csv(self):
+        if not self.stats:
+            QMessageBox.warning(self, "Export Error", "No data to export. Please load a mission file first.")
+            return
+
+        file_name, _ = QFileDialog.getSaveFileName(self, "Save CSV File", "", "CSV Files (*.csv)")
+        if not file_name:
+            return
+
+        try:
+            with open(file_name, 'w', newline='', encoding='utf-8') as csvfile:
+                writer = csv.writer(csvfile)
+                
+                # Write mission info
+                writer.writerow(["Mission Information"])
+                writer.writerow(["Mission Name", self.missionName])
+                writer.writerow(["Mission Time", self.displayTime(self.startTime)])
+                writer.writerow(["Mission Duration", self.displayTime(self.duration)])
+                writer.writerow([])
+
+                # Write stats headers
+                headers = [
+                    "Pilot Name", "Aircraft", "Group", "Take-offs", "Landings", "Fired Armament",
+                    "Killed Aircraft", "Killed Helicopter", "Killed Ship", "Killed SAM/AAA",
+                    "Killed Tank", "Killed Car", "Killed Infantry", "Team Kills", "Hits", "Destroyed"
+                ]
+                writer.writerow(headers)
+
+                # Write stats data
+                for pilot, data in self.stats.items():
+                    row = [
+                        pilot, data['Aircraft'], data['Group'],
+                        data['TakeOffs']['Count'], data['Lands']['Count'], data['Fired']['Count'],
+                        data['Killed']['Aircraft']['Count'], data['Killed']['Helicopter']['Count'],
+                        data['Killed']['Ship']['Count'], data['Killed']['SAM/AAA']['Count'],
+                        data['Killed']['Tank']['Count'], data['Killed']['Car']['Count'],
+                        data['Killed']['Infantry']['Count'], data['FriendlyFire']['Count'],
+                        data['Hit']['Count'], data['Destroyed']['Count']
+                    ]
+                    writer.writerow(row)
+
+                writer.writerow([])
+
+                # Write events headers
+                writer.writerow(["Events"])
+                writer.writerow(["Time", "Type", "Action"])
+
+                # Write events data
+                for event in self.events:
+                    time = self.displayTime(self.startTime + event['Time'])
+                    event_type = event['PrimaryObject'].get('Type', 'Unknown')
+                    action = self.format_event_action(event)
+                    writer.writerow([time, event_type, action])
+
+            QMessageBox.information(self, "Export Successful", f"Data exported successfully to {file_name}")
+        except Exception as e:
+            QMessageBox.critical(self, "Export Error", f"An error occurred while exporting: {str(e)}")
 
     def get_row_color(self, event):
         if event['Action'] == 'HasBeenDestroyed':
