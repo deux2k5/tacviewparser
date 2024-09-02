@@ -1,1 +1,21 @@
 .aider*
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+env/
+
+# PyInstaller build files
+build/
+dist/
+*.spec
+
+# IDE files
+.vscode/
+.idea/
+
+# Miscellaneous
+*.log
+*.csv
