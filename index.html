@@ -215,11 +215,7 @@
         }
 
         function updateAircraftFilter(stats) {
-            const aircraftGroups = {
-                'Air Force': ['F-15E', 'F-16C', 'A-10C'],
-                'Army': ['AH-64D', 'OH-58D', 'CH-47'],
-                'Navy': ['F-14B', 'F/A-18C']
-            };
+            const allowedAircraft = ['F-15E', 'F-16C', 'A-10C', 'AH-64D', 'OH-58D', 'CH-47', 'F-14B', 'F/A-18C'];
             const filterContainer = document.getElementById('aircraftFilter');
             filterContainer.innerHTML = '';
             
@@ -257,7 +253,7 @@
             $.fn.dataTable.ext.search.push(
                 function(settings, data, dataIndex) {
                     const aircraft = data[1]; // Assuming aircraft is in the second column
-                    return selectedAircraft.includes(aircraft);
+                    return allowedAircraft.includes(aircraft);
                 }
             );
             
