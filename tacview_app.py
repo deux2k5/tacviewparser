@@ -280,12 +280,6 @@ class TacviewApp(QMainWindow):
         minutes, seconds = divmod(remainder, 60)
         return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 
-def main():
-    app = QApplication(sys.argv)
-    ex = TacviewApp()
-    ex.show()
-    sys.exit(app.exec_())
-
     def format_event_action(self, event):
         action_text = f"{event['PrimaryObject'].get('Name', 'Unknown')} ({event['PrimaryObject'].get('Pilot', 'Unknown')}) {self.language.L(event['Action'])}"
         
@@ -304,6 +298,12 @@ def main():
                 action_text += f" by {event['SecondaryObject'].get('Pilot', 'Unknown')}"
         
         return action_text
+
+def main():
+    app = QApplication(sys.argv)
+    ex = TacviewApp()
+    ex.show()
+    sys.exit(app.exec_())
 
 if __name__ == '__main__':
     main()
