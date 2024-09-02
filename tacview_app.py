@@ -2,9 +2,9 @@ import sys
 import os
 import xml.etree.ElementTree as ET
 from datetime import datetime
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QVBoxLayout, QWidget, QPushButton, QFileDialog, QTableWidget, QTableWidgetItem, QTabWidget, QLabel, QHBoxLayout
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QVBoxLayout, QWidget, QPushButton, QFileDialog, QTableWidget, QTableWidgetItem, QTabWidget, QLabel, QHBoxLayout, QLineEdit
 from PyQt5.QtGui import QFont, QColor, QPixmap
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QSortFilterProxyModel
 
 class Language:
     def __init__(self):
@@ -73,12 +73,30 @@ class TacviewApp(QMainWindow):
         self.tabWidget.addTab(self.infoWidget, self.language.L("information"))
 
         # Statistics Tab
+        statsWidget = QWidget()
+        statsLayout = QVBoxLayout()
+        self.statsSearchInput = QLineEdit()
+        self.statsSearchInput.setPlaceholderText("Search pilots...")
+        self.statsSearchInput.textChanged.connect(self.filterStats)
+        statsLayout.addWidget(self.statsSearchInput)
         self.statsTable = QTableWidget()
-        self.tabWidget.addTab(self.statsTable, self.language.L("statsByPilot"))
+        self.statsTable.setSortingEnabled(True)
+        statsLayout.addWidget(self.statsTable)
+        statsWidget.setLayout(statsLayout)
+        self.tabWidget.addTab(statsWidget, self.language.L("statsByPilot"))
 
         # Events Tab
+        eventsWidget = QWidget()
+        eventsLayout = QVBoxLayout()
+        self.eventsSearchInput = QLineEdit()
+        self.eventsSearchInput.setPlaceholderText("Search events...")
+        self.eventsSearchInput.textChanged.connect(self.filterEvents)
+        eventsLayout.addWidget(self.eventsSearchInput)
         self.eventsTable = QTableWidget()
-        self.tabWidget.addTab(self.eventsTable, self.language.L("events"))
+        self.eventsTable.setSortingEnabled(True)
+        eventsLayout.addWidget(self.eventsTable)
+        eventsWidget.setLayout(eventsLayout)
+        self.tabWidget.addTab(eventsWidget, self.language.L("events"))
 
         openButton = QPushButton('Open XML File')
         openButton.clicked.connect(self.openFile)
@@ -87,6 +105,16 @@ class TacviewApp(QMainWindow):
         container = QWidget()
         container.setLayout(layout)
         self.setCentralWidget(container)
+
+    def filterStats(self, text):
+        for row in range(self.statsTable.rowCount()):
+            pilot = self.statsTable.item(row, 0).text().lower()
+            self.statsTable.setRowHidden(row, text.lower() not in pilot)
+
+    def filterEvents(self, text):
+        for row in range(self.eventsTable.rowCount()):
+            event_text = self.eventsTable.item(row, 2).text().lower()
+            self.eventsTable.setRowHidden(row, text.lower() not in event_text)
 
     def openFile(self):
         fileName, _ = QFileDialog.getOpenFileName(self, "Open XML File", "", "XML Files (*.xml)")
@@ -231,6 +259,7 @@ class TacviewApp(QMainWindow):
                     self.statsTable.item(row, col).setBackground(QColor(236, 236, 236))
 
         self.statsTable.resizeColumnsToContents()
+        self.statsTable.setSortingEnabled(True)
 
     def displayEvents(self):
         self.eventsTable.clear()
@@ -240,6 +269,7 @@ class TacviewApp(QMainWindow):
 
         for row, event in enumerate(self.events):
             time_item = QTableWidgetItem(self.displayTime(self.startTime + event['Time']))
+            time_item.setData(Qt.UserRole, event['Time'])  # Store original time for sorting
             self.eventsTable.setItem(row, 0, time_item)
 
             type_item = QTableWidgetItem(event['PrimaryObject'].get('Type', 'Unknown'))
@@ -255,6 +285,9 @@ class TacviewApp(QMainWindow):
                 self.eventsTable.item(row, col).setBackground(row_color)
 
         self.eventsTable.resizeColumnsToContents()
+        self.eventsTable.setSortingEnabled(True)
+        # Sort by time initially
+        self.eventsTable.sortItems(0, Qt.AscendingOrder)
 
     def get_row_color(self, event):
         if event['Action'] == 'HasBeenDestroyed':
