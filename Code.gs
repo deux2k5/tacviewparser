@@ -8,13 +8,19 @@ function doGet() {
 
 function getMissionData(missionNumber) {
   var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
-  var sheet = spreadsheet.getSheetByName('Mission ' + missionNumber);
+  var sheet;
+  
+  if (missionNumber === 'Overall') {
+    sheet = spreadsheet.getSheetByName('Overall');
+  } else {
+    sheet = spreadsheet.getSheetByName('Mission ' + missionNumber);
+  }
   
   if (sheet) {
     var data = sheet.getDataRange().getValues();
     
     var missionInfo = {
-      missionName: "Mission " + missionNumber,
+      missionName: missionNumber === 'Overall' ? "Overall Statistics" : "Mission " + missionNumber,
       missionTime: "N/A",
       missionDuration: "N/A"
     };
@@ -31,9 +37,10 @@ function getMissionData(missionNumber) {
         killedSAM: parseInt(data[i][6]),
         killedTank: parseInt(data[i][7]),
         killedCar: parseInt(data[i][8]),
-        teamKills: parseInt(data[i][9]),
-        hits: parseInt(data[i][10]),
-        destroyed: parseInt(data[i][11])
+        killedInfantry: parseInt(data[i][9]),
+        teamKills: parseInt(data[i][10]),
+        hits: parseInt(data[i][11]),
+        destroyed: parseInt(data[i][12])
       });
     }
     
@@ -49,7 +56,7 @@ function getMissionData(missionNumber) {
 function getAvailableMissions() {
   var spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheets = spreadsheet.getSheets();
-  var missions = [];
+  var missions = ['Overall'];
   
   for (var i = 0; i < sheets.length; i++) {
     var sheetName = sheets[i].getName();
@@ -59,5 +66,5 @@ function getAvailableMissions() {
     }
   }
   
-  return missions.sort((a, b) => a - b);
+  return missions;
 }
