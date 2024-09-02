@@ -325,7 +325,7 @@ class TacviewApp(QMainWindow):
             return QColor(211, 248, 211)  # Light green
 
     def parse_time(self, time_str):
-        dt = datetime.strptime(time_str, "%Y-%m-%d %H:%M:%S")
+        dt = datetime.strptime(time_str, "%Y-%m-%dT%H:%M:%SZ")
         return (dt - datetime(1970, 1, 1)).total_seconds()
 
     def displayTime(self, seconds):
