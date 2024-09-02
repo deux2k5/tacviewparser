@@ -411,7 +411,11 @@
 
         function backToMainPage() {
             location.reload();
-            google.script.run.withSuccessHandler(initializeMissions).getAvailableMissions();
+            google.script.run.withSuccessHandler(function(missions) {
+                initializeMissions(missions);
+                // Force a refresh of the page content
+                displayData({ pilotStats: [] });
+            }).getAvailableMissions();
         }
     </script>
 </body>
