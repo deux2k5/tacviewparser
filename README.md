@@ -1,6 +1,6 @@
 # Tacview Parser
 
-This application is a GUI tool for parsing and analyzing Tacview ACMI files. It provides a user-friendly interface to view mission information, pilot statistics, and event details from Tacview recordings.
+This application is a GUI tool for parsing and analyzing Tacview ACMI files. It provides a user-friendly interface to view mission information, pilot statistics, and event details from Tacview Flight Logs.
 
 ## Features
 
@@ -52,4 +52,4 @@ To create a standalone executable:
 
 ## Note
 
-This application is designed to work with Tacview ACMI files in XML format. Ensure your Tacview recordings are exported to XML before attempting to parse them with this tool.
+This application is designed to work with Tacview ACMI files in XML format. Ensure your Tacview Flight Logs are exported to XML before attempting to parse them with this tool.
