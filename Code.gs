@@ -31,7 +31,7 @@ function getMissionData(missionNumber) {
       if (row[0] !== "") {  // Skip empty rows
         pilotStats.push({
           pilotName: row[0],
-          aircraft: row[1] || "N/A",
+          aircraft: row[1] || "0",
           firedArmament: parseInt(row[2]) || 0,
           killedAircraft: parseInt(row[3]) || 0,
           killedHelicopter: parseInt(row[4]) || 0,
